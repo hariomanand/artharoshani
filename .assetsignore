@@ -1,0 +1,18 @@
+# Files NOT to upload as public static assets (fixes "Asset too large" from node_modules).
+# Only the web app (index.html, admin.html, css/, js/, data/, assets/, manifest, sw.js, PDF) is served.
+node_modules
+.git
+.github
+.claude
+tools
+supabase
+docs
+server.js
+package.json
+package-lock.json
+wrangler.jsonc
+.assetsignore
+.gitignore
+.gitattributes
+*.md
+*.py

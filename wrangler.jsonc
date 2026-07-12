@@ -1,0 +1,8 @@
+{
+  // Deploy ArthaRoshni as a static site on Cloudflare Workers (assets-only, no server code).
+  "name": "artharoshani",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "."
+  }
+}
