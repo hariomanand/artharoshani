@@ -1,4 +1,4 @@
-# ArthaPath — CBSE Economics 10–12 📈
+# ArthaRoshni — CBSE Economics 10–12 📈
 
 A free, offline-first **Progressive Web App** for CBSE Economics (Classes 10, 11 & 12) with:
 

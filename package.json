@@ -1,7 +1,7 @@
 {
   "name": "arthapath",
   "version": "1.0.0",
-  "description": "ArthaPath — free offline CBSE Economics PWA (Class 10–12) with technical labs, Supabase admin, deployed on Cloudflare Pages.",
+  "description": "ArthaRoshni — free offline CBSE Economics PWA (Class 10–12) with technical labs, Supabase admin, deployed on Cloudflare Pages.",
   "type": "commonjs",
   "scripts": {
     "dev": "node server.js",

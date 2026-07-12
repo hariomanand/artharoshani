@@ -1,4 +1,4 @@
-// Zero-dependency static server for local preview of the ArthaPath PWA.
+// Zero-dependency static server for local preview of the ArthaRoshni PWA.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -21,4 +21,4 @@ http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': types[path.extname(filePath)] || 'application/octet-stream' });
     res.end(data);
   });
-}).listen(port, () => console.log(`ArthaPath running at http://localhost:${port}`));
+}).listen(port, () => console.log(`ArthaRoshni running at http://localhost:${port}`));

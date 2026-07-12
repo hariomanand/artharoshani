@@ -106,12 +106,13 @@ function viewHome() {
     </a>`;
   }).join('');
 
-  return topbar('ArthaPath') + `<main class="page">
+  return topbar('ArthaRoshni') + `<main class="page">
     <div class="hero">
       <div class="hero__glow">₹</div>
       <div class="hero__badge">🎓 CBSE · NCERT-aligned</div>
       <h1>Master Economics,<br>Class 10 to 12</h1>
       <p>Clear chapter-wise notes, infographics, connector diagrams and a practice question bank — fully offline, always free.</p>
+      <p style="margin-top:10px;font-size:12px;opacity:.8">✨ ArthaRoshni — the light of economics · <b>by Roshani</b></p>
       <div class="hero__stats">
         <div class="hero__stat"><b>${s.chapters}</b><span>Chapters</span></div>
         <div class="hero__stat"><b>${s.questions}+</b><span>Questions</span></div>
@@ -368,11 +369,12 @@ function makeSnippet(hay, t) {
 /* -------------------------------------------------- ABOUT / import */
 function viewAbout() {
   const s = stats();
-  return topbar('About ArthaPath') + `<main class="page">
+  return topbar('About ArthaRoshni') + `<main class="page">
     <div class="hero" style="background:radial-gradient(120% 140% at 0% 0%, #7c3aed, #1e3a8a 60%, #0d9488)">
       <div class="hero__glow">i</div>
       <h1>Free. Offline. Yours.</h1>
-      <p>ArthaPath is a study companion for CBSE Economics, Classes 10–12. Every note, diagram and question lives inside the app — no login, no server, no cost.</p>
+      <p>ArthaRoshni is a study companion for CBSE Economics, Classes 10–12. Every note, diagram and question lives inside the app — no login, no server, no cost.</p>
+      <p style="margin-top:10px;font-size:13px;opacity:.85">Created with ❤️ by <b>Roshani</b> — to bring world-class economics to every student.</p>
     </div>
 
     <div class="section-title">📊 What’s inside</div>

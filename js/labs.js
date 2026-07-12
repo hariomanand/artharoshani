@@ -60,7 +60,7 @@ export function renderCatalogue() {
       <h1>500 Economics Labs</h1>
       <p class="lead">A full, free curriculum of hands-on labs — from first Python steps to advanced econometrics, NLP, behavioral experiments, climate & development economics.</p>
     </div>
-    <a class="btn" href="ArthaPath-500-Labs-Catalogue.pdf" target="_blank" rel="noopener" style="margin-bottom:14px">⬇️ Download the full 500-lab PDF catalogue</a>
+    <a class="btn" href="ArthaRoshni-500-Labs-Catalogue.pdf" target="_blank" rel="noopener" style="margin-bottom:14px">⬇️ Download the full 500-lab PDF catalogue</a>
     <div class="search-box">🔎 <input id="cat-q" type="search" placeholder="Search 500 labs — “regression”, “sentiment”, “Gini”…" value="${esc(catState.q)}" autocomplete="off"></div>
     <div class="fchip-row" data-group="track">${trackChips}</div>
     <div class="fchip-row" data-group="level">${levelChips}</div>

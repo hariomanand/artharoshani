@@ -1,5 +1,5 @@
 -- ================================================================
--- ArthaPath — Supabase schema (run once in SQL Editor)
+-- ArthaRoshni — Supabase schema (run once in SQL Editor)
 -- Creates tables, Row Level Security, an admin helper, the profile
 -- auto-creation trigger, and policies. Safe to re-run.
 -- ================================================================

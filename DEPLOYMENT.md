@@ -1,4 +1,4 @@
-# 🚀 ArthaPath — Full Free Deployment Guide
+# 🚀 ArthaRoshni — Full Free Deployment Guide
 
 Deploy the whole app for **₹0** using **GitHub + Cloudflare Pages + Supabase**. Total time ≈ 15 minutes. No credit card required.
 
@@ -14,7 +14,7 @@ Deploy the whole app for **₹0** using **GitHub + Cloudflare Pages + Supabase**
 ```bash
 git init
 git add .
-git commit -m "ArthaPath initial release"
+git commit -m "ArthaRoshni initial release"
 git branch -M main
 git remote add origin https://github.com/<your-username>/arthapath.git
 git push -u origin main
@@ -111,7 +111,7 @@ Uploaded files go to the public **`media`** storage bucket and are linked to a c
 node tools/gen-catalogue.js      # rewrites data/catalogue.js + data/catalogue.json
 ```
 
-- To **rebuild the PDF** (`ArthaPath-500-Labs-Catalogue.pdf`, linked for download in the app):
+- To **rebuild the PDF** (`ArthaRoshni-500-Labs-Catalogue.pdf`, linked for download in the app):
 
 ```bash
 pip install reportlab            # one-time

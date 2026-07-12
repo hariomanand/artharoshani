@@ -1,4 +1,4 @@
-// ArthaPath Admin — content, media (PPT/infographics), labs, users, announcements.
+// ArthaRoshni Admin — content, media (PPT/infographics), labs, users, announcements.
 // All operations go through Supabase with Row Level Security. If Supabase isn't
 // configured yet, a setup notice is shown instead.
 import { getSupabase, CLOUD_ENABLED } from './supabase.js';
@@ -45,7 +45,7 @@ function renderSetupNotice() {
 /* ------------------------------------------------ login */
 function renderLogin() {
   root.innerHTML = `<div class="adm-login"><div class="adm-card">
-    <div class="adm-top" style="border:none;padding:0 0 16px"><div class="logo">₹</div><h1>ArthaPath Admin</h1></div>
+    <div class="adm-top" style="border:none;padding:0 0 16px"><div class="logo">₹</div><h1>ArthaRoshni Admin</h1></div>
     <div class="field"><label>Email</label><input id="em" type="email" placeholder="you@example.com"></div>
     <div class="field"><label>Password</label><input id="pw" type="password" placeholder="••••••••"></div>
     <button class="btn js-login">🔑 Sign in</button>
@@ -75,7 +75,7 @@ async function renderShell() {
 
   const tabs = [['dash', '📊 Dashboard'], ['content', '📝 Notes'], ['media', '📎 Media/PPT'], ['labs', '🔬 Labs'], ['users', '👥 Users'], ['ann', '📢 Announce']];
   root.innerHTML = `<div class="adm-shell">
-    <div class="adm-top"><div class="logo">₹</div><h1>ArthaPath Admin</h1>
+    <div class="adm-top"><div class="logo">₹</div><h1>ArthaRoshni Admin</h1>
       <div class="who">${esc(prof?.full_name || user.email)} <button class="js-out">Sign out</button></div></div>
     <div class="adm-tabs">${tabs.map(([k, l]) => `<button data-tab="${k}" class="${tab === k ? 'active' : ''}">${l}</button>`).join('')}</div>
     <div class="adm-main" id="pane"></div>

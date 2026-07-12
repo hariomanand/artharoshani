@@ -1,5 +1,5 @@
-# Builds the ArthaPath Economics Labs PDF catalogue from data/catalogue.json.
-# Output: docs/ArthaPath-500-Labs-Catalogue.pdf (also copied to web root for download).
+# Builds the ArthaRoshni Economics Labs PDF catalogue from data/catalogue.json.
+# Output: docs/ArthaRoshni-500-Labs-Catalogue.pdf (also copied to web root for download).
 import json, os, datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -41,10 +41,12 @@ def rule(): story.append(HRFlowable(width='100%', thickness=0.7, color=LINE, spa
 
 # ============================ COVER ============================
 cover = Table([[Paragraph('₹', ParagraphStyle('logo', fontName='Helvetica-Bold', fontSize=52, textColor=colors.white, alignment=TA_CENTER))],
-               [Paragraph('ArthaPath', styles['KTitle'])],
+               [Paragraph('ArthaRoshni', styles['KTitle'])],
                [Paragraph('The 500-Lab Economics Skills Catalogue', styles['KSub'])],
                [Spacer(1, 8)],
-               [Paragraph('Free technical labs, notes & research skills for<br/>Class 10 · 11 · 12 and early college — built for every student', styles['KSub'])]],
+               [Paragraph('Free technical labs, notes & research skills for<br/>Class 10 · 11 · 12 and early college — built for every student', styles['KSub'])],
+               [Spacer(1, 6)],
+               [Paragraph('by <b>Roshani</b>', styles['KSub'])]],
               colWidths=[170*mm])
 cover.setStyle(TableStyle([
     ('BACKGROUND', (0,0), (-1,-1), BLUE),
@@ -68,7 +70,7 @@ story.append(PageBreak())
 # ============================ VISION ============================
 para('1 · Vision & Who This Is For', 'H1')
 rule()
-para('ArthaPath is a free, offline-first learning platform for economics students in Classes 10–12 and '
+para('ArthaRoshni is a free, offline-first learning platform for economics students in Classes 10–12 and '
      'early college — with a special focus on students in India (and Bihar) who rarely get exposure to the '
      'global-level "technical labs" that top universities run. Those labs (econometrics computing, '
      'experimental economics, data-science) usually need expensive software and infrastructure. This '
@@ -76,7 +78,7 @@ para('ArthaPath is a free, offline-first learning platform for economics student
 para('<b>What a student gets:</b> clear notes, PPT/reading material, quizzes, and 500 structured hands-on '
      'labs that teach real research skills — Python, statistics, econometrics, NLP/sentiment analysis, '
      'behavioural experiments, climate and development economics, and a capstone research track.')
-para('<b>Honest scope note.</b> The 500 labs below are ArthaPath’s own curriculum — activities you can build '
+para('<b>Honest scope note.</b> The 500 labs below are ArthaRoshni’s own curriculum — activities you can build '
      'and run for free. Section 2 separately summarises what real top universities offer (with sources); it '
      'does not claim these 500 are named foreign-university labs.', 'Small')
 
@@ -222,13 +224,13 @@ for ti, tr in enumerate(tracks):
 # ============================ CLOSING ============================
 para('6 · Deploy & Scale', 'H1')
 rule()
-para('This catalogue is the content backbone of the ArthaPath web app. To publish it for free: push the '
+para('This catalogue is the content backbone of the ArthaRoshni web app. To publish it for free: push the '
      'project to GitHub, connect Cloudflare Pages (free hosting + a free <i>*.pages.dev</i> domain), and '
      'optionally connect Supabase for the admin panel. Full instructions are in <b>DEPLOYMENT.md</b>.')
 para('To expand beyond 500, break any lab into micro-labs (e.g. "simple regression" → load data, visualise, '
      'correlate, fit OLS, read residuals, interpret, write up). Regenerate this document any time with '
      '<b>python tools/build-pdf.py</b>.')
-para('© ArthaPath — free to use and share for education. Built for students who deserve world-class '
+para('© ArthaRoshni — free to use and share for education. Built for students who deserve world-class '
      'economics training at zero cost.', 'Small')
 
 # ============================ page numbers ============================
@@ -236,18 +238,18 @@ def footer(canvas, doc):
     canvas.saveState()
     canvas.setFont('Helvetica', 8)
     canvas.setFillColor(GREY)
-    canvas.drawString(18*mm, 12*mm, 'ArthaPath · 500-Lab Economics Catalogue')
+    canvas.drawString(18*mm, 12*mm, 'ArthaRoshni · 500-Lab Economics Catalogue')
     canvas.drawRightString(192*mm, 12*mm, f'Page {doc.page}')
     canvas.restoreState()
 
 os.makedirs(os.path.join(ROOT, 'docs'), exist_ok=True)
-out = os.path.join(ROOT, 'docs', 'ArthaPath-500-Labs-Catalogue.pdf')
+out = os.path.join(ROOT, 'docs', 'ArthaRoshni-500-Labs-Catalogue.pdf')
 doc = SimpleDocTemplate(out, pagesize=A4, topMargin=16*mm, bottomMargin=18*mm,
                         leftMargin=18*mm, rightMargin=18*mm,
-                        title='ArthaPath — 500 Economics Labs Catalogue', author='ArthaPath')
+                        title='ArthaRoshni — 500 Economics Labs Catalogue', author='ArthaRoshni')
 doc.build(story, onFirstPage=footer, onLaterPages=footer)
 
 # copy to web root for download link
 import shutil
-shutil.copy(out, os.path.join(ROOT, 'ArthaPath-500-Labs-Catalogue.pdf'))
+shutil.copy(out, os.path.join(ROOT, 'ArthaRoshni-500-Labs-Catalogue.pdf'))
 print('PDF written:', out, '(', os.path.getsize(out)//1024, 'KB )')
