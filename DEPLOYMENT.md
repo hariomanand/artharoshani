@@ -8,7 +8,7 @@ Deploy the whole app for **₹0** using **GitHub + Cloudflare Pages + Supabase**
 
 ## Step 1 — Put the code on GitHub
 
-1. Create a free account at <https://github.com> and click **New repository** → name it `arthapath` → **Create**.
+1. Create a free account at <https://github.com> and click **New repository** → name it `artharoshni` → **Create**.
 2. On your PC, in the `econ-master` folder:
 
 ```bash
@@ -16,7 +16,7 @@ git init
 git add .
 git commit -m "ArthaRoshni initial release"
 git branch -M main
-git remote add origin https://github.com/<your-username>/arthapath.git
+git remote add origin https://github.com/<your-username>/artharoshni.git
 git push -u origin main
 ```
 
@@ -27,13 +27,13 @@ git push -u origin main
 ## Step 2 — Host on Cloudflare Pages (free hosting + free domain)
 
 1. Sign up free at <https://dash.cloudflare.com> → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**.
-2. Authorise GitHub and pick your `arthapath` repo.
+2. Authorise GitHub and pick your `artharoshni` repo.
 3. Build settings — **leave everything empty** (this is a no-build static site):
    - Framework preset: **None**
    - Build command: *(blank)*
    - Build output directory: `/`
 4. Click **Save and Deploy**.
-5. In ~30 seconds you get a live URL like **`https://arthapath.pages.dev`** — that's your free domain. ✅
+5. In ~30 seconds you get a live URL like **`https://artharoshni.pages.dev`** — that's your free domain. ✅
 
 Every future `git push` auto-deploys.
 
@@ -83,7 +83,7 @@ git add js/config.js && git commit -m "Connect Supabase" && git push
 update public.profiles set role = 'admin' where email = 'you@example.com';
 ```
 
-5. Open **`https://arthapath.pages.dev/admin.html`**, sign in — you're in the admin panel. 🎉
+5. Open **`https://artharoshni.pages.dev/admin.html`**, sign in — you're in the admin panel. 🎉
 
 ---
 
