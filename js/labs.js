@@ -1,6 +1,7 @@
 // Technical Economics Labs — views + interactive in-browser tools.
 // All tools run client-side (zero backend, zero cost).
 import { LABS, labById } from '../data/labs.js';
+import { CATALOGUE, TRACK_META } from '../data/catalogue.js';
 
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -26,8 +27,90 @@ export function renderLabsHub() {
       <h1>Technical<br>Economics Labs</h1>
       <p>Hands-on labs modelled on real university facilities — econometrics, Python, sentiment analysis, behavioral experiments and more. Click, run and learn.</p>
     </div>
-    <div class="section-title">🧪 Choose a lab</div>
+    <a class="lab-card" href="#/catalogue" style="border-color:var(--primary)">
+      <div class="lab-card__icon" style="background:var(--primary-soft);color:var(--primary)">📚</div>
+      <div class="lab-card__body">
+        <h3>Full Lab Catalogue — 500 labs</h3>
+        <p>Every skill area, class 10 → college. Searchable & filterable.</p>
+        <div class="lab-card__meta"><span class="chip chip--live">${CATALOGUE.length} labs</span><span class="chip">${TRACK_META.length} tracks</span></div>
+      </div>
+      <div class="lab-card__chev">›</div>
+    </a>
+
+    <div class="section-title">🧪 Interactive labs (run in-browser)</div>
     <div class="lab-grid">${cards}</div>
+  </main>`;
+}
+
+/* ============================== 500-LAB CATALOGUE ============================== */
+const catState = { q: '', track: 'all', level: 'all' };
+
+export function renderCatalogue() {
+  const trackChips = ['all', ...TRACK_META.map(t => t.key)].map(k => {
+    const meta = TRACK_META.find(t => t.key === k);
+    const label = k === 'all' ? 'All tracks' : `${meta.icon} ${meta.name.split(' ')[0]}`;
+    return `<button class="fchip ${catState.track === k ? 'active' : ''}" data-f="track" data-v="${k}">${label}</button>`;
+  }).join('');
+  const levelChips = ['all', 'Beginner', 'Intermediate', 'Advanced'].map(l =>
+    `<button class="fchip ${catState.level === l ? 'active' : ''}" data-f="level" data-v="${l}">${l === 'all' ? 'All levels' : l}</button>`).join('');
+
+  return `<main class="page">
+    <div class="reader-head">
+      <div class="kicker" style="color:var(--primary)">📚 Master Catalogue</div>
+      <h1>500 Economics Labs</h1>
+      <p class="lead">A full, free curriculum of hands-on labs — from first Python steps to advanced econometrics, NLP, behavioral experiments, climate & development economics.</p>
+    </div>
+    <a class="btn" href="ArthaPath-500-Labs-Catalogue.pdf" target="_blank" rel="noopener" style="margin-bottom:14px">⬇️ Download the full 500-lab PDF catalogue</a>
+    <div class="search-box">🔎 <input id="cat-q" type="search" placeholder="Search 500 labs — “regression”, “sentiment”, “Gini”…" value="${esc(catState.q)}" autocomplete="off"></div>
+    <div class="fchip-row" data-group="track">${trackChips}</div>
+    <div class="fchip-row" data-group="level">${levelChips}</div>
+    <div id="cat-list"></div>
+  </main>`;
+}
+
+function filteredCatalogue() {
+  const q = catState.q.trim().toLowerCase();
+  return CATALOGUE.filter(l =>
+    (catState.track === 'all' || l.trackKey === catState.track) &&
+    (catState.level === 'all' || l.difficulty === catState.level) &&
+    (!q || (l.title + l.subtopic + l.skills + l.track).toLowerCase().includes(q)));
+}
+
+function renderCatalogueList() {
+  const box = document.getElementById('cat-list');
+  if (!box) return;
+  const rows = filteredCatalogue();
+  const CAP = 60;
+  box.innerHTML = `<div class="cat-count">${rows.length} lab${rows.length === 1 ? '' : 's'}</div>` + (rows.length
+    ? rows.slice(0, CAP).map(l => `<a class="cat-row" href="#/lab-item/${l.id}">
+        <div class="cat-row__id" style="background:${l.color}1a;color:${l.color}">${l.id}</div>
+        <div class="cat-row__body">
+          <h4>${esc(l.title)}</h4>
+          <p><span class="chip">${l.icon} ${esc(l.subtopic)}</span> <span class="chip">${esc(l.level)}</span> <span class="chip chip--diff-${l.difficulty.toLowerCase()}">${l.difficulty}</span></p>
+        </div><div class="chapter-row__chev">›</div></a>`).join('')
+      + (rows.length > CAP ? `<p class="muted center mt">Showing ${CAP} of ${rows.length}. Use search or the track / level filters above to narrow down.</p>` : '')
+    : `<div class="empty"><div class="ico">🔍</div><h3>No labs match</h3><p>Try a different keyword or filter.</p></div>`);
+}
+
+export function renderCatalogueLab(id) {
+  const l = CATALOGUE.find(x => x.id === id);
+  if (!l) return `<main class="page"><div class="empty"><div class="ico">📚</div><h3>Lab not found</h3></div></main>`;
+  const steps = l.steps.map((s, i) => `<div class="flow__step"><div class="flow__rail"><div class="flow__node" style="background:${l.color};box-shadow:0 0 0 4px ${l.color}22">${i + 1}</div>${i < l.steps.length - 1 ? `<div class="flow__line" style="background:linear-gradient(${l.color}, ${l.color}55)"></div>` : ''}</div><div class="flow__card"><p>${esc(s)}</p></div></div>`).join('');
+  const spec = [['🎯 Objective', l.output], ['🧠 Skills', l.skills], ['📊 Data source', l.data], ['🛠️ Tools', l.tools], ['📈 Level', l.level], ['⏱️ Time', l.minutes + ' min'], ['✅ Assessment', l.assessment], ['🏷️ Difficulty', l.difficulty]];
+  return `<main class="page">
+    <div class="reader-head">
+      <div class="kicker" style="color:${l.color}">Lab ${l.id} · ${l.icon} ${esc(l.track)}</div>
+      <h1>${esc(l.title)}</h1>
+      <p class="lead">${esc(l.subtopic)} — build this lab as a free Colab notebook or web activity.</p>
+    </div>
+    <div class="section-title">📋 Lab specification</div>
+    <div class="tbl-wrap"><table class="data"><tbody>${spec.map(([k, v]) => `<tr><th style="width:38%">${k}</th><td>${esc(v)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="section-title">🧭 How to build & run it</div>
+    <div class="flow">${steps}</div>
+    <div class="btn-row">
+      <a class="btn" href="https://colab.research.google.com/#create=true" target="_blank" rel="noopener">▶ Open a free Colab notebook</a>
+    </div>
+    <a class="btn btn--ghost" href="#/catalogue">← Back to catalogue</a>
   </main>`;
 }
 
@@ -116,6 +199,19 @@ function renderTool(kind, color) {
 
 /* ============================== TOOLS (logic) ============================== */
 export function wireLabs() {
+  // Catalogue filters
+  const catList = document.getElementById('cat-list');
+  if (catList) {
+    renderCatalogueList();
+    const q = document.getElementById('cat-q');
+    if (q) q.addEventListener('input', () => { catState.q = q.value; renderCatalogueList(); });
+    document.querySelectorAll('.fchip').forEach(b => b.addEventListener('click', () => {
+      catState[b.dataset.f] = b.dataset.v;
+      document.querySelectorAll(`.fchip[data-f="${b.dataset.f}"]`).forEach(x => x.classList.toggle('active', x === b));
+      renderCatalogueList();
+    }));
+  }
+
   const host = document.getElementById('labtool');
   if (!host) return;
   const kind = host.dataset.tool;

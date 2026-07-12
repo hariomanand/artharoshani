@@ -1,8 +1,9 @@
 import { CLASSES, byClass, findChapter, allReadyChapters, stats } from '../data/index.js';
 import { renderBlocks } from './blocks.js';
 import { Store } from './store.js';
-import { renderLabsHub, renderLab, wireLabs } from './labs.js';
+import { renderLabsHub, renderLab, wireLabs, renderCatalogue, renderCatalogueLab } from './labs.js';
 import { labById } from '../data/labs.js';
+import { CATALOGUE } from '../data/catalogue.js';
 import { syncFromCloud, extraMedia } from './content.js';
 
 const app = document.getElementById('app');
@@ -27,6 +28,8 @@ const routes = {
   about: viewAbout,
   labs: viewLabs,
   lab: viewLab,
+  catalogue: viewCatalogue,
+  'lab-item': viewCatalogueLab,
 };
 
 function viewLabs() { return topbar('Technical Labs', 'Hands-on economics') + renderLabsHub(); }
@@ -34,11 +37,16 @@ function viewLab([id]) {
   const l = labById(id);
   return topbar(l ? l.title : 'Lab', 'Technical Lab', { back: '#/labs' }) + renderLab(id);
 }
+function viewCatalogue() { return topbar('500 Labs', 'Master catalogue', { back: '#/labs' }) + renderCatalogue(); }
+function viewCatalogueLab([id]) {
+  const l = CATALOGUE.find(x => x.id === id);
+  return topbar(l ? `Lab ${l.id}` : 'Lab', l ? l.track : '', { back: '#/catalogue' }) + renderCatalogueLab(id);
+}
 
 function render() {
   const { name, params } = parseHash();
   const view = routes[name] || viewHome;
-  const activeTab = name === 'lab' ? 'labs' : name;
+  const activeTab = ['lab', 'catalogue', 'lab-item'].includes(name) ? 'labs' : name;
   app.innerHTML = `<div class="app">${view(params)}</div>${tabbar(activeTab)}`;
   window.scrollTo(0, 0);
   wire();

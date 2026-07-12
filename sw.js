@@ -1,5 +1,5 @@
 // ArthaPath service worker — cache-first, offline-ready. No backend needed.
-const CACHE = 'arthapath-v2';
+const CACHE = 'arthapath-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const ASSETS = [
   './data/class11.js',
   './data/class12.js',
   './data/labs.js',
+  './data/catalogue.js',
 ];
 
 self.addEventListener('install', e => {

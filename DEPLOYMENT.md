@@ -102,6 +102,24 @@ Uploaded files go to the public **`media`** storage bucket and are linked to a c
 
 ---
 
+## The 500-lab catalogue & PDF
+
+- The full **500-lab catalogue** lives in `data/catalogue.js` (generated) and is browsable in the app at `#/catalogue` (search + filter by track/level). It ships with the site — no backend needed.
+- To **regenerate** the catalogue after editing the lab lists in `tools/gen-catalogue.js`:
+
+```bash
+node tools/gen-catalogue.js      # rewrites data/catalogue.js + data/catalogue.json
+```
+
+- To **rebuild the PDF** (`ArthaPath-500-Labs-Catalogue.pdf`, linked for download in the app):
+
+```bash
+pip install reportlab            # one-time
+python tools/build-pdf.py        # writes docs/ + web-root PDF
+```
+
+- To **expand beyond 500**, split any lab into micro-labs inside `tools/gen-catalogue.js`, then rerun both commands and `git push` — Cloudflare redeploys automatically.
+
 ## Updating content in code (alternative to admin)
 
 - **Notes/chapters:** edit `data/class10.js`, `class11.js`, `class12.js` (block schema documented in the admin *Notes* tab and `js/blocks.js`).

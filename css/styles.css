@@ -362,6 +362,23 @@ mark { background: var(--gold-soft); color: var(--gold); padding: 0 2px; border-
 pre.code { background: #0b1120; color: #e2e8f0; border-radius: 12px; padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--line); }
 pre.code code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; white-space: pre; }
 
+/* Catalogue filters + rows */
+.fchip-row { display: flex; gap: 7px; overflow-x: auto; padding: 10px 0 4px; scrollbar-width: none; }
+.fchip-row::-webkit-scrollbar { display: none; }
+.fchip { flex: none; font-size: 12.5px; font-weight: 600; padding: 7px 13px; border-radius: 999px; background: var(--bg-elev); border: 1px solid var(--line); color: var(--ink-soft); white-space: nowrap; }
+.fchip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.cat-count { font-size: 12px; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; margin: 14px 4px 10px; }
+.cat-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 8px; box-shadow: var(--shadow-sm); transition: transform .12s; }
+.cat-row:active { transform: scale(.99); }
+.cat-row__id { width: 40px; height: 40px; border-radius: 10px; flex: none; display: grid; place-content: center; font-weight: 800; font-size: 13px; }
+.cat-row__body { flex: 1; min-width: 0; }
+.cat-row__body h4 { font-size: 14.5px; line-height: 1.25; }
+.cat-row__body p { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.cat-row__body .chip { font-size: 10.5px; padding: 3px 8px; }
+.chip--diff-beginner { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.chip--diff-intermediate { background: var(--primary-soft); color: var(--primary); border-color: transparent; }
+.chip--diff-advanced { background: var(--gold-soft); color: var(--gold); border-color: transparent; }
+
 /* Utility */
 .muted { color: var(--ink-faint); }
 .center { text-align: center; }
