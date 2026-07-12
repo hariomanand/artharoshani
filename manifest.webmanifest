@@ -1,0 +1,17 @@
+{
+  "name": "ArthaPath — CBSE Economics 10–12",
+  "short_name": "ArthaPath",
+  "description": "Free offline CBSE Economics learning app for Class 10, 11 & 12 — notes, infographics, diagrams and a practice question bank.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1120",
+  "theme_color": "#1e3a8a",
+  "categories": ["education"],
+  "lang": "en-IN",
+  "icons": [
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "arthapath",
+  "version": "1.0.0",
+  "description": "ArthaPath — free offline CBSE Economics PWA (Class 10–12) with technical labs, Supabase admin, deployed on Cloudflare Pages.",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": ["economics", "cbse", "ncert", "pwa", "education", "supabase"],
+  "license": "MIT"
+}
