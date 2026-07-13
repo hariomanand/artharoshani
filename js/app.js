@@ -204,13 +204,6 @@ function blogCard(p) {
   </a>`;
 }
 
-function adPanel(size = 'rect', label = 'Partner') {
-  const dims = size === 'leader' ? '728 × 90 · Leaderboard' : '300 × 250 · Medium Rectangle';
-  return `<div class="ad-panel ad-panel--${size}">
-    <div class="ad-kicker">${esc(label)}</div>${dims}<small>Partner placement · ArthaRoshni</small>
-  </div>`;
-}
-
 /* -------------------------------------------------- HOME (marketing) */
 let homeCourseTab = 'all';       // all | class-10 | class-11 | class-12
 let homeClassTab = 'class-10';   // class features section
@@ -348,8 +341,6 @@ G = Government Spending
     </div>
   </section>
 
-  <section style="background:var(--slate-50);padding:32px 0"><div class="container">${adPanel('leader', 'Advertisement')}</div></section>
-
   <section class="mkt-sec" id="home-certs">
     <div class="mkt-sec__head"><div><h2>Get Certified with ArthaRoshni</h2>
       <p>Four structured paths from Class 10 foundations to research-ready data skills. Finish the chapters, clear the quizzes — the path is free from start to finish.</p></div>
@@ -395,7 +386,6 @@ G = Government Spending
       <p>Revision plans, budget explainers and skill guides — written for CBSE Economics students.</p></div>
     </div>
     <div class="blog-grid">${blogTeasers}</div>
-    <div class="partner-grid" style="margin-top:32px">${adPanel()}${adPanel()}${adPanel()}</div>
   </section>
 
   <section class="media-strip"><div class="media-strip__in">
@@ -536,7 +526,6 @@ function viewBlogs() {
   <section class="mkt-sec">
     ${featuredHtml}
     <div class="blog-grid">${rest.map(blogCard).join('')}</div>
-    <div class="partner-grid" style="margin-top:32px">${adPanel()}${adPanel()}${adPanel()}</div>
   </section>
 
   <section class="cta-band"><div class="cta-band__in">
