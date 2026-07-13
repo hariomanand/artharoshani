@@ -5,29 +5,29 @@
 
 :root {
   /* Brand palette */
-  --bg: #f6f7fb;
+  --bg: #f8fafc;
   --bg-elev: #ffffff;
-  --ink: #0f172a;
+  --ink: #0a1b3b;
   --ink-soft: #475569;
   --ink-faint: #94a3b8;
   --line: #e6e8ef;
   --line-soft: #eef0f6;
 
-  --primary: #1d4ed8;
+  --primary: #1f3a63;
   --primary-ink: #ffffff;
-  --primary-soft: #e8efff;
-  --accent: #0d9488;
-  --accent-soft: #d7f5f0;
-  --gold: #b45309;
-  --gold-soft: #fdeccf;
+  --primary-soft: #e0e8f4;
+  --accent: #c78800;
+  --accent-soft: #fdf3d8;
+  --gold: #c78800;
+  --gold-soft: #fdf3d8;
   --danger: #dc2626;
   --danger-soft: #fde3e3;
   --ok: #16a34a;
   --ok-soft: #dcfce7;
 
-  --c10: #2563eb;
-  --c11: #0d9488;
-  --c12: #7c3aed;
+  --c10: #2c4f84;
+  --c11: #0f766e;
+  --c12: #be123c;
 
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, .06);
   --shadow: 0 6px 20px rgba(15, 23, 42, .08);
@@ -37,34 +37,13 @@
   --radius-sm: 12px;
   --radius-lg: 22px;
 
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --maxw: 780px;
   --nav-h: 64px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b1120;
-    --bg-elev: #131c31;
-    --ink: #eef2ff;
-    --ink-soft: #a9b6d3;
-    --ink-faint: #6b7a9c;
-    --line: #22304d;
-    --line-soft: #1a2740;
-    --primary: #4f7dff;
-    --primary-soft: #17274d;
-    --accent: #2dd4bf;
-    --accent-soft: #10312e;
-    --gold: #f59e0b;
-    --gold-soft: #3a2a0c;
-    --danger: #f87171;
-    --danger-soft: #3a1717;
-    --ok: #4ade80;
-    --ok-soft: #16311f;
-    --shadow: 0 8px 24px rgba(0, 0, 0, .5);
-    --shadow-lg: 0 20px 44px rgba(0, 0, 0, .6);
-  }
-}
+/* Dark auto-theme removed — the CFI-style redesign is light-first, with
+   its own dark sections (hero, platform band, footer) baked in. */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }

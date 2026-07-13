@@ -1,5 +1,5 @@
 // ArthaRoshni service worker — cache-first, offline-ready. No backend needed.
-const CACHE = 'arthapath-v5';
+const CACHE = 'arthapath-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -19,6 +19,8 @@ const ASSETS = [
   './data/class12.js',
   './data/labs.js',
   './data/catalogue.js',
+  './data/site.js',
+  './data/blog.js',
 ];
 
 self.addEventListener('install', e => {
