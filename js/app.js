@@ -101,11 +101,6 @@ function siteHeader(active) {
       <span>The 500-Lab Master Catalogue is live — 10 tracks, every lab free.</span></div>
     <a class="announce__cta" href="#/catalogue">Open the catalogue →</a>
   </div></div>
-  <div class="ad-strip"><div class="ad-strip__in">
-    <span class="ad-strip__label">Advertisement</span>
-    <div class="ad-panel ad-panel--leader">728 × 90 · Leaderboard<small>Partner placement · ArthaRoshni</small></div>
-    <span class="ad-strip__label">Report Ad</span>
-  </div></div>
   <header class="site-nav js-sitenav"><div class="site-nav__in">
     <a class="brand" href="#/">${brandMark}</a>
     <nav class="nav-links">${links}</nav>
