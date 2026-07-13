@@ -2,8 +2,8 @@ import { CLASSES, byClass, findChapter, allReadyChapters, stats } from '../data/
 import { renderBlocks } from './blocks.js';
 import { Store } from './store.js';
 import { renderLabsHub, renderLab, wireLabs, renderCatalogue, renderCatalogueLab } from './labs.js';
-import { labById } from '../data/labs.js';
-import { CATALOGUE } from '../data/catalogue.js';
+import { labById, LABS } from '../data/labs.js';
+import { CATALOGUE, TRACK_META } from '../data/catalogue.js';
 import { syncFromCloud, extraMedia } from './content.js';
 
 const app = document.getElementById('app');
@@ -30,6 +30,8 @@ const routes = {
   lab: viewLab,
   catalogue: viewCatalogue,
   'lab-item': viewCatalogueLab,
+  courses: viewCourses,
+  students: viewStudents,
 };
 
 function viewLabs() { return topbar('Technical Labs', 'Hands-on economics') + renderLabsHub(); }
@@ -46,8 +48,10 @@ function viewCatalogueLab([id]) {
 function render() {
   const { name, params } = parseHash();
   const view = routes[name] || viewHome;
-  const activeTab = ['lab', 'catalogue', 'lab-item'].includes(name) ? 'labs' : name;
-  app.innerHTML = `<div class="app">${view(params)}</div>${tabbar(activeTab)}`;
+  let active = name;
+  if (['lab', 'catalogue', 'lab-item'].includes(name)) active = 'labs';
+  if (['class', 'read', 'quiz'].includes(name)) active = 'class';
+  app.innerHTML = siteHeader(active) + view(params) + siteFooter();
   window.scrollTo(0, 0);
   wire();
   wireLabs();
@@ -68,78 +72,253 @@ function topbar(title, sub, opts = {}) {
   </header>`;
 }
 
-function tabbar(active) {
-  const items = [
-    { n: 'home', href: '#/', ic: '🏠', l: 'Home' },
-    { n: 'labs', href: '#/labs', ic: '🔬', l: 'Labs' },
-    { n: 'practice', href: '#/practice', ic: '📝', l: 'Practice' },
-    { n: 'bookmarks', href: '#/bookmarks', ic: '★', l: 'Saved' },
-    { n: 'about', href: '#/about', ic: 'ℹ️', l: 'About' },
-  ];
-  return `<nav class="tabbar">${items.map(i =>
-    `<a href="${i.href}" class="${active === i.n ? 'active' : ''}"><span class="ic">${i.ic}</span>${i.l}</a>`
-  ).join('')}</nav>`;
+const brandMark = `<span class="brand__mark">₹</span> <span>Artha<b>Roshni</b></span>`;
+
+function siteHeader(active) {
+  const link = (n, href, label) => `<a class="nav-link ${active === n ? 'active' : ''}" href="${href}">${label}</a>`;
+  const dd = CLASSES.map(c => `<a class="nav-dd__item" href="#/class/${c.id}">
+    <span class="ic" style="background:${c.color}">${c.grade}</span>
+    <span><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></span></a>`).join('');
+  return `<header class="site-nav"><div class="site-nav__in">
+    <a class="brand" href="#/">${brandMark}</a>
+    <nav class="nav-links">
+      <div class="nav-dd">
+        <a class="nav-link ${active === 'class' ? 'active' : ''}" href="#/courses">Courses ▾</a>
+        <div class="nav-dd__panel">${dd}
+          <a class="nav-dd__item" href="#/courses"><span class="ic" style="background:var(--brand)">▤</span><span><b>All courses</b><small>Browse the full catalogue</small></span></a>
+        </div>
+      </div>
+      ${link('labs', '#/labs', 'Labs')}
+      ${link('catalogue', '#/catalogue', '500 Labs')}
+      ${link('practice', '#/practice', 'Practice')}
+      ${link('students', '#/students', 'For Students')}
+      ${link('about', '#/about', 'About')}
+    </nav>
+    <div class="nav-right">
+      <form class="nav-search js-navsearch"><span>🔎</span><input placeholder="Search topics…"></form>
+      <a class="c-btn c-btn--primary" href="#/courses">Start free</a>
+      <button class="nav-toggle js-navtoggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <div class="mobile-menu js-mobilemenu">
+    <a href="#/courses">Courses</a>
+    ${CLASSES.map(c => `<a href="#/class/${c.id}">— ${esc(c.title)}</a>`).join('')}
+    <a href="#/labs">Labs</a><a href="#/catalogue">500 Labs</a><a href="#/practice">Practice</a>
+    <a href="#/students">For Students</a><a href="#/about">About</a><a href="#/search">Search</a>
+    <a class="c-btn c-btn--primary" href="#/courses">Start free</a>
+  </div></header>`;
 }
 
-/* -------------------------------------------------- HOME */
+function siteFooter() {
+  return `<footer class="site-footer">
+    <div class="site-footer__in">
+      <div class="site-footer__brand"><a class="brand" href="#/">${brandMark}</a>
+        <p>Free, world-class economics learning for every student — Class 10 to college. Notes, technical labs, quizzes & research skills at zero cost.</p></div>
+      <div><h5>Learn</h5><a href="#/courses">All courses</a><a href="#/class/class-10">Class 10</a><a href="#/class/class-11">Class 11</a><a href="#/class/class-12">Class 12</a><a href="#/practice">Practice</a></div>
+      <div><h5>Labs</h5><a href="#/labs">Technical Labs</a><a href="#/catalogue">500-Lab Catalogue</a><a href="#/lab/econometrics">Econometrics</a><a href="#/lab/sentiment">Sentiment Analysis</a><a href="#/lab/behavioral">Behavioral</a></div>
+      <div><h5>ArthaRoshni</h5><a href="#/about">About</a><a href="#/students">For Students</a><a href="ArthaRoshni-500-Labs-Catalogue.pdf" target="_blank" rel="noopener">Download PDF</a><a href="admin.html">Admin</a></div>
+      <div><h5>Resources</h5><a href="#/search">Search</a><a href="#/bookmarks">Saved</a><a href="https://ncert.nic.in/textbook.php" target="_blank" rel="noopener">NCERT books</a><a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a></div>
+    </div>
+    <div class="site-footer__bar"><div class="site-footer__bar-in">
+      <span>© 2026 ArthaRoshni · by Roshani — free for education.</span>
+      <span>Built for the students of India 🇮🇳</span>
+    </div></div>
+  </footer>`;
+}
+
+/* -------------------------------------------------- course card helper */
+function courseCard({ href, color, icon, tag, kick, title, desc, meta, rating }) {
+  return `<a class="course-card" href="${href}">
+    <div class="course-card__top" style="background:linear-gradient(135deg, ${color}, ${color}bb)">
+      <span class="course-card__tag">${esc(tag)}</span>${icon}
+    </div>
+    <div class="course-card__body">
+      <div class="kick">${esc(kick)}</div>
+      <h3>${esc(title)}</h3>
+      <p>${esc(desc)}</p>
+      <div class="course-card__foot">
+        <span class="course-card__meta"><span class="star">★ ${rating || '4.9'}</span> · ${esc(meta)}</span>
+        <span class="free">Free</span>
+      </div>
+    </div>
+  </a>`;
+}
+
+/* -------------------------------------------------- HOME (marketing) */
 function viewHome() {
   const s = stats();
-  const prog = Store.progress();
-  const pct = Math.round((prog.readCount / Math.max(s.ready, 1)) * 100);
+  const classCards = CLASSES.map(c => courseCard({
+    href: `#/class/${c.id}`, color: c.color, icon: `<b style="font-size:40px">${c.grade}</b>`,
+    tag: `Class ${c.grade}`, kick: 'CBSE · NCERT-aligned', title: c.title, desc: c.subtitle,
+    meta: `${c.subjects.flatMap(su => su.chapters).length} chapters`,
+  })).join('');
+  const labCards = LABS.slice(0, 3).map(l => courseCard({
+    href: `#/lab/${l.id}`, color: l.color, icon: l.icon, tag: 'Lab', kick: l.level,
+    title: l.title, desc: l.tagline, meta: 'Interactive',
+  })).join('');
 
-  const classCards = CLASSES.map(c => {
-    const chs = c.subjects.flatMap(su => su.chapters);
-    const readyCount = chs.filter(x => x.status === 'ready').length;
-    const readCount = chs.filter(x => Store.isRead(x.id)).length;
-    const p = Math.round((readCount / Math.max(readyCount, 1)) * 100);
-    return `<a class="class-card" href="#/class/${c.id}">
-      <div class="class-card__badge" style="background:linear-gradient(135deg, ${c.color}, ${c.color}bb)">
-        <b>${c.grade}</b>Class
+  const pills = [
+    ['#/class/class-10', '📗 Class 10'], ['#/class/class-11', '📘 Class 11'], ['#/class/class-12', '📙 Class 12'],
+    ['#/lab/econometrics', '📈 Econometrics'], ['#/lab/sentiment', '🗣️ Sentiment Analysis'],
+    ['#/lab/python-econ', '🐍 Python'], ['#/lab/behavioral', '🧠 Behavioral'], ['#/catalogue', '🔬 500 Labs'],
+  ].map(([h, l]) => `<a class="pill" href="${h}">${l}</a>`).join('');
+
+  return `
+  <section class="mkt-hero"><div class="mkt-hero__in">
+    <div>
+      <div class="hero__badge" style="background:var(--primary-soft);color:var(--brand)">🎓 CBSE · NCERT-aligned · 100% free</div>
+      <h1>Learn economics<br>the way <em>top universities</em> teach it.</h1>
+      <p class="sub">Notes, PPTs, quizzes and <b>500 hands-on technical labs</b> — econometrics, Python, sentiment analysis and more. For Class 10–12 and beyond. Always free.</p>
+      <div class="mkt-hero__cta">
+        <a class="c-btn c-btn--primary c-btn--lg" href="#/courses">Explore courses</a>
+        <a class="c-btn c-btn--outline c-btn--lg" href="#/labs">Try a lab →</a>
       </div>
-      <div class="class-card__body">
-        <h3>${esc(c.title)}</h3>
-        <p>${esc(c.subtitle)}</p>
-        <div class="class-card__meta"><span>📚 ${chs.length} chapters</span><span>✅ ${readyCount} ready</span></div>
-        <div class="pbar"><i style="width:${p}%"></i></div>
+      <div class="mkt-hero__trust">
+        <div><b>${s.chapters}</b> Chapters</div>
+        <div><b>500+</b> Technical labs</div>
+        <div><b>${s.questions}+</b> Questions</div>
+        <div><b>₹0</b> Forever</div>
       </div>
-      <div class="class-card__chev">›</div>
-    </a>`;
+    </div>
+    <div class="mkt-hero__art"><div class="mkt-hero__card">
+      <h4>What you’ll master</h4>
+      <div class="mkt-hero__stat"><span class="n" style="background:var(--primary-soft)">📈</span><span><b>Econometrics & regression</b><br><span>Run real models on Indian data</span></span></div>
+      <div class="mkt-hero__stat"><span class="n" style="background:var(--accent-soft)">🗣️</span><span><b>Sentiment analysis</b><br><span>Measure the tone of RBI & budget text</span></span></div>
+      <div class="mkt-hero__stat"><span class="n" style="background:#ede9fe">🧠</span><span><b>Behavioral experiments</b><br><span>Play & analyse economic games</span></span></div>
+    </div></div>
+  </div></section>
+
+  <div class="mkt-search"><div class="mkt-search__box">
+    <span style="font-size:20px">🔎</span>
+    <input class="js-homesearch" placeholder="Search notes, topics & labs — “GDP”, “regression”, “sentiment”…">
+    <a class="c-btn c-btn--primary js-homesearch-btn" href="#/search">Search</a>
+  </div></div>
+
+  <section class="mkt-sec">
+    <div class="mkt-sec__head"><div><h2>Browse by topic</h2><p>Jump straight to what you need.</p></div></div>
+    <div class="pill-row">${pills}</div>
+  </section>
+
+  <section class="mkt-sec" style="padding-top:0">
+    <div class="mkt-sec__head"><div><h2>Class courses</h2><p>Full NCERT-aligned notes, infographics & quizzes.</p></div><a class="c-btn c-btn--ghost" href="#/courses">View all</a></div>
+    <div class="course-grid">${classCards}</div>
+  </section>
+
+  <div class="band"><div class="band__in">
+    <div class="band__stat"><b>500+</b><span>Technical labs to build</span></div>
+    <div class="band__stat"><b>${s.chapters}</b><span>NCERT chapters</span></div>
+    <div class="band__stat"><b>10</b><span>Skill tracks</span></div>
+    <div class="band__stat"><b>₹0</b><span>Cost, forever</span></div>
+  </div></div>
+
+  <section class="mkt-sec">
+    <div class="mkt-sec__head"><div><h2>Featured technical labs</h2><p>University-style facilities, free in your browser.</p></div><a class="c-btn c-btn--ghost" href="#/labs">All labs</a></div>
+    <div class="course-grid">${labCards}</div>
+  </section>
+
+  <section class="mkt-sec" style="padding-top:0">
+    <div class="mkt-sec__head"><div><h2>Why ArthaRoshni</h2><p>Everything a serious economics student needs.</p></div></div>
+    <div class="feature-grid">
+      <div class="feature"><div class="ic">📖</div><h3>Clear, visual notes</h3><p>Every chapter explained with infographics, connector diagrams, tables and key terms — not walls of text.</p></div>
+      <div class="feature"><div class="ic">🔬</div><h3>Real research skills</h3><p>500 labs teach Python, econometrics, NLP and behavioral experiments — the tools top universities charge lakhs for.</p></div>
+      <div class="feature"><div class="ic">📝</div><h3>Practice that sticks</h3><p>Chapter-wise quizzes with instant feedback and a real-PYQ import slot to prepare for boards.</p></div>
+      <div class="feature"><div class="ic">📴</div><h3>Works offline</h3><p>Install it like an app. Learn on any phone, even with a weak connection.</p></div>
+      <div class="feature"><div class="ic">🌍</div><h3>Global standard, local focus</h3><p>Modelled on MIT, ETH Zurich & Berkeley labs — taught with Indian data and examples.</p></div>
+      <div class="feature"><div class="ic">💛</div><h3>Free, forever</h3><p>No fees, no login walls. Built so cost is never a barrier to world-class learning.</p></div>
+    </div>
+  </section>
+
+  <section class="cta-band"><div class="cta-band__in">
+    <h2>Start learning today — it’s free</h2>
+    <p>Join thousands of students building real economics skills. No sign-up needed to begin.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a class="c-btn c-btn--white c-btn--lg" href="#/courses">Browse courses</a>
+      <a class="c-btn c-btn--lg" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.5)" href="#/catalogue">See all 500 labs</a>
+    </div>
+  </div></section>`;
+}
+
+/* -------------------------------------------------- COURSES catalog */
+function viewCourses() {
+  const classCards = CLASSES.map(c => courseCard({
+    href: `#/class/${c.id}`, color: c.color, icon: `<b style="font-size:40px">${c.grade}</b>`,
+    tag: `Class ${c.grade}`, kick: 'CBSE · NCERT-aligned', title: c.title, desc: c.subtitle,
+    meta: `${c.subjects.flatMap(su => su.chapters).length} chapters`,
+  })).join('');
+  const subjectCards = CLASSES.flatMap(c => c.subjects.map(su => courseCard({
+    href: `#/class/${c.id}`, color: su.color || c.color, icon: '📚', tag: `Class ${c.grade}`,
+    kick: c.title, title: su.title, desc: su.note || '', meta: `${su.chapters.length} chapters`,
+  }))).join('');
+  const trackCards = TRACK_META.map(t => {
+    const n = CATALOGUE.filter(l => l.trackKey === t.key).length;
+    return courseCard({ href: `#/catalogue`, color: t.color, icon: t.icon, tag: 'Lab track',
+      kick: 'Technical Lab', title: t.name, desc: `${n} hands-on labs to build and run for free.`, meta: `${n} labs` });
   }).join('');
 
-  return topbar('ArthaRoshni') + `<main class="page">
-    <div class="hero">
-      <div class="hero__glow">₹</div>
-      <div class="hero__badge">🎓 CBSE · NCERT-aligned</div>
-      <h1>Master Economics,<br>Class 10 to 12</h1>
-      <p>Clear chapter-wise notes, infographics, connector diagrams and a practice question bank — fully offline, always free.</p>
-      <p style="margin-top:10px;font-size:12px;opacity:.8">✨ ArthaRoshni — the light of economics · <b>by Roshani</b></p>
-      <div class="hero__stats">
-        <div class="hero__stat"><b>${s.chapters}</b><span>Chapters</span></div>
-        <div class="hero__stat"><b>${s.questions}+</b><span>Questions</span></div>
-        <div class="hero__stat"><b>${pct}%</b><span>You’ve read</span></div>
-      </div>
+  return `
+  <section class="mkt-hero"><div class="mkt-hero__in" style="grid-template-columns:1fr">
+    <div>
+      <div class="hero__badge" style="background:var(--primary-soft);color:var(--brand)">📚 All courses</div>
+      <h1 style="font-size:42px">The full ArthaRoshni catalogue</h1>
+      <p class="sub" style="max-width:60ch">Class courses, subject tracks and 500 technical labs — every one free. Pick a class to get notes & quizzes, or a lab track to build research skills.</p>
     </div>
+  </div></section>
 
-    <div class="section-title">📖 Choose your class</div>
-    <div class="class-grid">${classCards}</div>
+  <section class="mkt-sec">
+    <div class="mkt-sec__head"><div><h2>By class</h2><p>NCERT-aligned notes, infographics & quizzes.</p></div></div>
+    <div class="course-grid">${classCards}</div>
+  </section>
+  <section class="mkt-sec" style="padding-top:0">
+    <div class="mkt-sec__head"><div><h2>By subject</h2></div></div>
+    <div class="course-grid">${subjectCards}</div>
+  </section>
+  <section class="mkt-sec" style="padding-top:0">
+    <div class="mkt-sec__head"><div><h2>Technical lab tracks</h2><p>10 tracks · 500 labs. From first Python steps to advanced econometrics.</p></div><a class="c-btn c-btn--ghost" href="#/catalogue">Open catalogue</a></div>
+    <div class="course-grid">${trackCards}</div>
+  </section>`;
+}
 
-    <div class="section-title">🔬 Technical labs</div>
-    <a class="class-card" href="#/labs">
-      <div class="class-card__badge" style="background:linear-gradient(135deg,#7c3aed,#0d9488)">🔬</div>
-      <div class="class-card__body">
-        <h3>Economics Labs</h3>
-        <p>Run regressions, simulate markets, analyze sentiment & more</p>
-        <div class="class-card__meta"><span>▶ 6 interactive tools</span><span>🏛️ University-style</span></div>
-      </div>
-      <div class="class-card__chev">›</div>
-    </a>
-
-    <div class="section-title">⚡ Quick start</div>
-    <div class="btn-row">
-      <a class="btn" href="#/practice">📝 Practice questions</a>
-      <a class="btn btn--ghost" href="#/search">🔎 Search topics</a>
+/* -------------------------------------------------- FOR STUDENTS */
+function viewStudents() {
+  return `
+  <section class="mkt-hero"><div class="mkt-hero__in">
+    <div>
+      <div class="hero__badge" style="background:var(--primary-soft);color:var(--brand)">🎓 For students</div>
+      <h1>Your path from<br>Class 10 to <em>research-ready</em>.</h1>
+      <p class="sub">Whether you’re revising for boards or dreaming of a top university, ArthaRoshni gives you the notes, practice and real technical skills to get there — free.</p>
+      <div class="mkt-hero__cta"><a class="c-btn c-btn--primary c-btn--lg" href="#/courses">Start with your class</a></div>
     </div>
-  </main>`;
+    <div class="mkt-hero__art"><div class="mkt-hero__card">
+      <h4>A simple 3-step path</h4>
+      <div class="mkt-hero__stat"><span class="n" style="background:var(--primary-soft)">1</span><span><b>Learn the concept</b><br><span>Visual notes for every chapter</span></span></div>
+      <div class="mkt-hero__stat"><span class="n" style="background:var(--accent-soft)">2</span><span><b>Practice & test</b><br><span>Quizzes with instant feedback</span></span></div>
+      <div class="mkt-hero__stat"><span class="n" style="background:#ede9fe">3</span><span><b>Build real skills</b><br><span>Run labs like a researcher</span></span></div>
+    </div></div>
+  </div></section>
+
+  <section class="mkt-sec">
+    <div class="mkt-sec__head"><div><h2>How it works</h2></div></div>
+    <div class="steps-3">
+      <div class="step-c"><div class="num">1</div><h3>Pick your class</h3><p>Class 10, 11 or 12 — get NCERT-aligned notes with infographics and diagrams.</p></div>
+      <div class="step-c"><div class="num">2</div><h3>Practise & revise</h3><p>Take chapter quizzes, save chapters, and track what you’ve learned.</p></div>
+      <div class="step-c"><div class="num">3</div><h3>Go beyond the syllabus</h3><p>Open the technical labs and start doing real economics research with free tools.</p></div>
+    </div>
+  </section>
+
+  <section class="mkt-sec" style="padding-top:0">
+    <div class="mkt-sec__head"><div><h2>Built for every student</h2></div></div>
+    <div class="feature-grid">
+      <div class="feature"><div class="ic">📱</div><h3>Any device</h3><p>Works on a basic phone, offline, installable to your home screen.</p></div>
+      <div class="feature"><div class="ic">🧑‍🏫</div><h3>No coaching needed</h3><p>Self-paced, clearly explained, and free of cost.</p></div>
+      <div class="feature"><div class="ic">🔬</div><h3>Future-ready</h3><p>Learn Python, data & AI skills that universities and employers value.</p></div>
+    </div>
+  </section>
+
+  <section class="cta-band"><div class="cta-band__in">
+    <h2>Your future starts with one chapter</h2>
+    <p>No fees. No sign-up. Just open a course and begin.</p>
+    <a class="c-btn c-btn--white c-btn--lg" href="#/courses">Browse courses</a>
+  </div></section>`;
 }
 
 /* -------------------------------------------------- CLASS */
@@ -422,6 +601,21 @@ function notFound() { return topbar('Not found', '', { back: '#/' }) + `<main cl
 
 /* -------------------------------------------------- events */
 function wire() {
+  // Mobile menu toggle
+  const tgl = document.querySelector('.js-navtoggle');
+  if (tgl) tgl.addEventListener('click', () => document.querySelector('.js-mobilemenu')?.classList.toggle('open'));
+
+  // Navbar + home search -> go to search page with query
+  const goSearch = val => { location.hash = '#/search'; setTimeout(() => { const q = document.getElementById('q'); if (q) { q.value = val; q.dispatchEvent(new Event('input')); } }, 0); };
+  const ns = document.querySelector('.js-navsearch');
+  if (ns) ns.addEventListener('submit', e => { e.preventDefault(); goSearch(ns.querySelector('input').value); });
+  const hs = document.querySelector('.js-homesearch');
+  if (hs) {
+    const trigger = () => goSearch(hs.value);
+    hs.addEventListener('keydown', e => { if (e.key === 'Enter') trigger(); });
+    document.querySelector('.js-homesearch-btn')?.addEventListener('click', e => { e.preventDefault(); trigger(); });
+  }
+
   document.querySelectorAll('.js-bookmark').forEach(b => b.addEventListener('click', () => {
     const on = Store.toggleBookmark(b.dataset.id);
     b.textContent = on ? '★' : '☆';
