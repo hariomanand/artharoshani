@@ -2,14 +2,18 @@
 // All tools run client-side (zero backend, zero cost).
 import { LABS, labById } from '../data/labs.js';
 import { CATALOGUE, TRACK_META } from '../data/catalogue.js';
+import { icon } from './icons.js';
 
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const TRACK_ICONS = { python: 'code', data: 'bars', stats: 'calc', behav: 'brain', nlp: 'chat',
+  climate: 'leaf', intl: 'globe', capstone: 'gradcap', econ1: 'scatter', econ2: 'candles' };
+const tIcon = (key, size = 14) => icon(TRACK_ICONS[key] || 'labs', size);
 
 /* ============================== HUB ============================== */
 export function renderLabsHub() {
   const cards = LABS.map(l => `
     <a class="lab-card" href="#/lab/${l.id}">
-      <div class="lab-card__icon" style="background:${l.color}1a;color:${l.color}">${l.icon}</div>
+      <div class="lab-card__icon" style="background:${l.color}1a;color:${l.color}">${icon(l.icon, 26)}</div>
       <div class="lab-card__body">
         <h3>${esc(l.title)}</h3>
         <p>${esc(l.tagline)}</p>
@@ -28,7 +32,7 @@ export function renderLabsHub() {
       <p>Hands-on labs modelled on real university facilities — econometrics, Python, sentiment analysis, behavioral experiments and more. Click, run and learn.</p>
     </div>
     <a class="lab-card" href="#/catalogue" style="border-color:var(--primary)">
-      <div class="lab-card__icon" style="background:var(--primary-soft);color:var(--primary)">📚</div>
+      <div class="lab-card__icon" style="background:var(--primary-soft);color:var(--primary)">${icon('grid', 26)}</div>
       <div class="lab-card__body">
         <h3>Full Lab Catalogue — 500 labs</h3>
         <p>Every skill area, class 10 → college. Searchable & filterable.</p>
@@ -48,7 +52,7 @@ const catState = { q: '', track: 'all', level: 'all' };
 export function renderCatalogue() {
   const trackChips = ['all', ...TRACK_META.map(t => t.key)].map(k => {
     const meta = TRACK_META.find(t => t.key === k);
-    const label = k === 'all' ? 'All tracks' : `${meta.icon} ${meta.name.split(' ')[0]}`;
+    const label = k === 'all' ? 'All tracks' : `${tIcon(k, 13)} ${meta.name.split(' ')[0]}`;
     return `<button class="fchip ${catState.track === k ? 'active' : ''}" data-f="track" data-v="${k}">${label}</button>`;
   }).join('');
   const levelChips = ['all', 'Beginner', 'Intermediate', 'Advanced'].map(l =>
@@ -86,7 +90,7 @@ function renderCatalogueList() {
         <div class="cat-row__id" style="background:${l.color}1a;color:${l.color}">${l.id}</div>
         <div class="cat-row__body">
           <h4>${esc(l.title)}</h4>
-          <p><span class="chip">${l.icon} ${esc(l.subtopic)}</span> <span class="chip">${esc(l.level)}</span> <span class="chip chip--diff-${l.difficulty.toLowerCase()}">${l.difficulty}</span></p>
+          <p><span class="chip">${tIcon(l.trackKey, 12)} ${esc(l.subtopic)}</span> <span class="chip">${esc(l.level)}</span> <span class="chip chip--diff-${l.difficulty.toLowerCase()}">${l.difficulty}</span></p>
         </div><div class="chapter-row__chev">›</div></a>`).join('')
       + (rows.length > CAP ? `<p class="muted center mt">Showing ${CAP} of ${rows.length}. Use search or the track / level filters above to narrow down.</p>` : '')
     : `<div class="empty"><div class="ico">🔍</div><h3>No labs match</h3><p>Try a different keyword or filter.</p></div>`);
@@ -99,7 +103,7 @@ export function renderCatalogueLab(id) {
   const spec = [['🎯 Objective', l.output], ['🧠 Skills', l.skills], ['📊 Data source', l.data], ['🛠️ Tools', l.tools], ['📈 Level', l.level], ['⏱️ Time', l.minutes + ' min'], ['✅ Assessment', l.assessment], ['🏷️ Difficulty', l.difficulty]];
   return `<main class="page">
     <div class="reader-head">
-      <div class="kicker" style="color:${l.color}">Lab ${l.id} · ${l.icon} ${esc(l.track)}</div>
+      <div class="kicker" style="color:${l.color}">Lab ${l.id} · ${tIcon(l.trackKey, 14)} ${esc(l.track)}</div>
       <h1>${esc(l.title)}</h1>
       <p class="lead">${esc(l.subtopic)} — build this lab as a free Colab notebook or web activity.</p>
     </div>
@@ -132,7 +136,7 @@ export function renderLab(id) {
 
   return `<main class="page">
     <div class="reader-head">
-      <div class="kicker" style="color:${l.color}">${l.icon} Technical Lab</div>
+      <div class="kicker" style="color:${l.color}">${icon(l.icon, 15)} Technical Lab</div>
       <h1>${esc(l.title)}</h1>
       <p class="lead">${esc(l.about)}</p>
     </div>

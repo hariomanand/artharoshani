@@ -11,7 +11,7 @@
 
 export const LABS = [
   {
-    id: 'econometrics', icon: '📈', color: '#2563eb',
+    id: 'econometrics', icon: 'scatter', color: '#2563eb',
     title: 'Econometrics Lab',
     tagline: 'Run real regressions — estimate relationships in economic data.',
     level: 'Class 11–12 · UG',
@@ -31,7 +31,7 @@ export const LABS = [
     ],
   },
   {
-    id: 'python-econ', icon: '🐍', color: '#0d9488',
+    id: 'python-econ', icon: 'code', color: '#0d9488',
     title: 'Python for Economics Lab',
     tagline: 'Analyse economic data with pandas, NumPy & statsmodels.',
     level: 'Class 12 · UG',
@@ -52,7 +52,7 @@ export const LABS = [
     ],
   },
   {
-    id: 'data-viz', icon: '📊', color: '#7c3aed',
+    id: 'data-viz', icon: 'sliders', color: '#7c3aed',
     title: 'Data Visualization & Market Simulator',
     tagline: 'Drag the sliders — watch supply, demand & equilibrium move.',
     level: 'Class 11–12',
@@ -71,7 +71,7 @@ export const LABS = [
     ],
   },
   {
-    id: 'sentiment', icon: '🗣️', color: '#dc2626',
+    id: 'sentiment', icon: 'chat', color: '#dc2626',
     title: 'Economic Sentiment Analysis Lab',
     tagline: 'Paste an RBI/Budget statement — measure its tone with text-as-data.',
     level: 'Class 12 · UG',
@@ -91,7 +91,7 @@ export const LABS = [
     ],
   },
   {
-    id: 'behavioral', icon: '🧠', color: '#b45309',
+    id: 'behavioral', icon: 'brain', color: '#b45309',
     title: 'Experimental & Behavioral Economics Lab',
     tagline: 'Play classic economic games and see how real people decide.',
     level: 'Class 12 · UG',
@@ -110,7 +110,7 @@ export const LABS = [
     ],
   },
   {
-    id: 'timeseries', icon: '💹', color: '#16a34a',
+    id: 'timeseries', icon: 'candles', color: '#16a34a',
     title: 'Financial & Time-Series Lab',
     tagline: 'Compute returns, moving averages & volatility on a price series.',
     level: 'Class 12 · UG',
@@ -129,7 +129,7 @@ export const LABS = [
     ],
   },
   {
-    id: 'spatial', icon: '🗺️', color: '#0891b2',
+    id: 'spatial', icon: 'pin', color: '#0891b2',
     title: 'Spatial & GIS Economics Lab',
     tagline: 'Map economic data — regional inequality, trade & development.',
     level: 'UG',

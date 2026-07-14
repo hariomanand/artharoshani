@@ -7,6 +7,9 @@ import { CATALOGUE, TRACK_META } from '../data/catalogue.js';
 import { syncFromCloud, extraMedia } from './content.js';
 import { HOME_COURSES, CERTS, CLASS_FEATURES, TESTIMONIALS, PLATFORM_FEATURES, CAREERS, TEACHERS, SOURCES } from '../data/site.js';
 import { POSTS, postById } from '../data/blog.js';
+import { icon } from './icons.js';
+import { renderBlueprint, wireBlueprint } from './blueprint.js';
+import { BP_CHAPTERS } from '../data/blueprint.js';
 
 const app = document.getElementById('app');
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -35,9 +38,13 @@ const routes = {
   courses: viewCourses,
   students: viewStudents,
   certifications: viewCertifications,
+  cert: viewCert,
   blogs: viewBlogs,
   blog: viewBlogPost,
+  blueprint: viewBlueprint,
 };
+
+function viewBlueprint([chapterId]) { return renderBlueprint(chapterId); }
 
 function viewLabs() { return topbar('Technical Labs', 'Hands-on economics') + renderLabsHub(); }
 function viewLab([id]) {
@@ -55,12 +62,14 @@ function render() {
   const view = routes[name] || viewHome;
   let active = name;
   if (['lab', 'catalogue', 'lab-item'].includes(name)) active = 'labs';
-  if (['class', 'read', 'quiz'].includes(name)) active = 'courses';
+  if (['class', 'read', 'quiz', 'blueprint'].includes(name)) active = 'courses';
   if (name === 'blog') active = 'blogs';
+  if (name === 'cert') active = 'certifications';
   app.innerHTML = siteHeader(active) + view(params) + siteFooter();
   window.scrollTo(0, 0);
   wire();
   wireLabs();
+  wireBlueprint();
 }
 window.addEventListener('hashchange', render);
 window.addEventListener('scroll', () => {
@@ -83,37 +92,128 @@ function topbar(title, sub, opts = {}) {
 
 const brandMark = `<span class="brand__mark">₹</span><span class="brand__text"><b>ArthaRoshni</b><small>CBSE Economics · Classes 10–12</small></span>`;
 
+/* Navbar — every top item has its own custom SVG icon + a dropdown whose
+   entries each lead to their own page. */
 const NAV = [
-  ['courses', '#/courses', 'Courses'],
-  ['certifications', '#/certifications', 'Certifications'],
-  ['labs', '#/labs', 'Labs'],
-  ['practice', '#/practice', 'Practice'],
-  ['blogs', '#/blogs', 'Blogs'],
-  ['about', '#/about', 'About'],
+  {
+    key: 'courses', label: 'Courses', href: '#/courses', icon: 'courses',
+    menu: [
+      { icon: 'class10', t: 'Class 10 Economics', d: 'Development, sectors, money & credit', href: '#/class/class-10' },
+      { icon: 'class11', t: 'Class 11 Economics', d: 'Statistics + micro foundations', href: '#/class/class-11' },
+      { icon: 'class12', t: 'Class 12 Economics', d: 'Macro + Indian Economic Development', href: '#/class/class-12' },
+      { icon: 'compass', t: "India's Economic Blueprint", d: 'Interactive 8-chapter special', href: '#/blueprint', hot: true },
+      { icon: 'grid', t: 'All courses', d: 'The complete catalogue', href: '#/courses' },
+    ],
+  },
+  {
+    key: 'certifications', label: 'Certifications', href: '#/certifications', icon: 'certifications',
+    menu: [
+      { icon: 'class10', t: 'ACE-10 · CBSE 10 Achiever', d: 'Complete Class 10, quiz by quiz', href: '#/cert/ace-10' },
+      { icon: 'class11', t: 'ACE-11 · Stats & Micro', d: 'The Class 11 dual path', href: '#/cert/ace-11' },
+      { icon: 'class12', t: 'ACE-12 · Macro & IED Master', d: 'The board-decider path', href: '#/cert/ace-12' },
+      { icon: 'medal', t: 'ACE-PRO · Research & Labs', d: 'Python, data & econometrics', href: '#/cert/ace-pro' },
+      { icon: 'grid', t: 'All certification paths', d: 'Compare the four paths', href: '#/certifications' },
+    ],
+  },
+  {
+    key: 'labs', label: 'Labs', href: '#/labs', icon: 'labs',
+    menu: [
+      { icon: 'scatter', t: 'Econometrics Lab', d: 'Run real OLS regressions', href: '#/lab/econometrics' },
+      { icon: 'code', t: 'Python for Economics', d: 'pandas, NumPy & Colab', href: '#/lab/python-econ' },
+      { icon: 'sliders', t: 'Market Simulator', d: 'Drag supply & demand live', href: '#/lab/data-viz' },
+      { icon: 'chat', t: 'Sentiment Analysis', d: 'Text-as-data, in your browser', href: '#/lab/sentiment' },
+      { icon: 'brain', t: 'Behavioral Economics', d: 'Play the ultimatum game', href: '#/lab/behavioral' },
+      { icon: 'grid', t: '500-Lab Master Catalogue', d: '10 tracks · every lab free', href: '#/catalogue', hot: true },
+    ],
+  },
+  {
+    key: 'practice', label: 'Practice', href: '#/practice', icon: 'practice',
+    menu: [
+      { icon: 'checkSquare', t: 'Chapter quiz bank', d: 'Instant-feedback questions', href: '#/practice' },
+      { icon: 'bookmark', t: 'Saved chapters', d: 'Your bookmarks, one tap away', href: '#/bookmarks' },
+      { icon: 'search', t: 'Search any topic', d: 'Every note, term & diagram', href: '#/search' },
+      { icon: 'star', t: 'Import real PYQs', d: 'How the PYQ badge works', href: '#/about' },
+    ],
+  },
+  {
+    key: 'blogs', label: 'Blogs', href: '#/blogs', icon: 'blogs',
+    menu: [
+      { icon: 'file', t: 'NCERT revision plan', d: '30 days to board-ready', href: '#/blog/ncert-revision-plan-2026' },
+      { icon: 'rupee', t: 'Union Budget, explained', d: 'For Class 12 economics', href: '#/blog/union-budget-2025-26-class-12' },
+      { icon: 'code', t: 'Python for econ students', d: 'Your first data notebook', href: '#/blog/python-for-economics-students' },
+      { icon: 'grid', t: 'All articles', d: 'The full ArthaRoshni blog', href: '#/blogs' },
+    ],
+  },
+  {
+    key: 'about', label: 'About', href: '#/about', icon: 'about',
+    menu: [
+      { icon: 'heart', t: 'About ArthaRoshni', d: 'Free. Offline. Yours.', href: '#/about' },
+      { icon: 'gradcap', t: 'For students', d: 'From Class 10 to research-ready', href: '#/students' },
+      { icon: 'compass', t: "India's Economic Blueprint", d: 'The interactive special', href: '#/blueprint' },
+    ],
+  },
 ];
 
+function dropPanel(item) {
+  return `<div class="nav-drop" role="menu">
+    ${item.menu.map(m => `
+      <a class="nav-drop__item ${m.hot ? 'hot' : ''}" href="${m.href}" role="menuitem">
+        <span class="nav-drop__ic">${icon(m.icon, 20)}</span>
+        <span class="nav-drop__tx"><b>${m.t}</b><small>${m.d}</small></span>
+        <span class="nav-drop__go">${icon('arrow', 14)}</span>
+      </a>`).join('')}
+  </div>`;
+}
+
 function siteHeader(active) {
-  const links = NAV.map(([n, href, label]) =>
-    `<a class="nav-link ${active === n ? 'active' : ''}" href="${href}">${label}</a>`).join('');
+  const links = NAV.map(item => `
+    <div class="nav-item ${active === item.key ? 'is-active' : ''}">
+      <a class="nav-link ${active === item.key ? 'active' : ''}" href="${item.href}">
+        ${icon(item.icon, 16)}<span>${item.label}</span>${icon('chevron', 12, 'nav-link__chev')}
+      </a>
+      ${dropPanel(item)}
+    </div>`).join('');
+
+  const mobileGroups = NAV.map(item => `
+    <div class="mm-group">
+      <button class="mm-group__head js-mmgroup" type="button">
+        ${icon(item.icon, 17)}<span>${item.label}</span>${icon('chevron', 14, 'mm-chev')}
+      </button>
+      <div class="mm-group__body">
+        <a class="mm-main" href="${item.href}">${icon('arrow', 13)} Open ${item.label}</a>
+        ${item.menu.map(m => `<a href="${m.href}">${icon(m.icon, 15)} ${m.t}</a>`).join('')}
+      </div>
+    </div>`).join('');
+
   return `
   <div class="announce"><div class="announce__in">
     <div class="announce__msg"><span class="announce__new">New</span>
-      <span>The 500-Lab Master Catalogue is live — 10 tracks, every lab free.</span></div>
-    <a class="announce__cta" href="#/catalogue">Open the catalogue →</a>
+      <span>India's Economic Blueprint — an interactive 8-chapter journey from 1947 to a $5-trillion future.</span></div>
+    <a class="announce__cta" href="#/blueprint">Explore the Blueprint →</a>
   </div></div>
   <header class="site-nav js-sitenav"><div class="site-nav__in">
     <a class="brand" href="#/">${brandMark}</a>
     <nav class="nav-links">${links}</nav>
     <div class="nav-right">
-      <a class="nav-icon" href="#/search" aria-label="Search">🔍</a>
-      <a class="c-btn c-btn--primary" href="#/courses">Start free</a>
-      <button class="nav-toggle js-navtoggle" aria-label="Menu">☰</button>
+      <form class="nav-search js-navsearch" role="search">
+        ${icon('search', 16)}<input type="search" placeholder="Search" aria-label="Search topics">
+      </form>
+      <a class="nav-icon js-searchicon" href="#/search" aria-label="Search">${icon('search', 18)}</a>
+      <a class="nav-login" href="admin.html">${icon('user', 16)}<span>Log In</span></a>
+      <a class="c-btn c-btn--startfree" href="#/courses">Start Free</a>
+      <button class="nav-toggle js-navtoggle" aria-label="Menu">${icon('menu', 22)}</button>
     </div>
   </div>
   <div class="mobile-menu js-mobilemenu">
-    ${NAV.map(([, href, label]) => `<a href="${href}">${label}</a>`).join('')}
-    <a href="#/search">Search</a>
-    <a class="c-btn c-btn--primary" href="#/courses">Start free</a>
+    <form class="nav-search nav-search--mobile js-navsearch" role="search">
+      ${icon('search', 16)}<input type="search" placeholder="Search any topic…" aria-label="Search topics">
+    </form>
+    ${mobileGroups}
+    <a class="mm-flat" href="#/blueprint">${icon('compass', 17)} India's Economic Blueprint</a>
+    <div class="mm-actions">
+      <a class="c-btn c-btn--startfree" href="admin.html">${icon('user', 15)} Log In</a>
+      <a class="c-btn c-btn--primary" href="#/courses">Start Free</a>
+    </div>
   </div></header>`;
 }
 
@@ -135,7 +235,7 @@ function siteFooter() {
         <p>All 10 tracks — Python, econometrics, NLP, behavioral and more — as one printable PDF. Download it once, keep it forever.</p>
       </div>
       <div class="nl-band__actions">
-        <a class="c-btn c-btn--primary c-btn--lg" href="ArthaRoshni-500-Labs-Catalogue.pdf" target="_blank" rel="noopener">📄 Download the PDF</a>
+        <a class="c-btn c-btn--primary c-btn--lg" href="ArthaRoshni-500-Labs-Catalogue.pdf" target="_blank" rel="noopener">${icon('download', 16)} Download the PDF</a>
         <a class="c-btn c-btn--outline c-btn--lg" href="#/catalogue">Browse it online</a>
       </div>
     </div></div>
@@ -144,7 +244,7 @@ function siteFooter() {
         <p>India's free learning platform for CBSE Economics — Classes 10, 11 & 12. Notes, quizzes and 500 technical labs, at zero cost, offline-ready.</p>
         <div class="site-footer__social">${socials}</div>
       </div>
-      <div><h5>Courses</h5><a href="#/courses">All courses</a><a href="#/class/class-10">Class 10 Economics</a><a href="#/class/class-11">Class 11 Statistics & Micro</a><a href="#/class/class-12">Class 12 Macro & IED</a><a href="#/certifications">Certifications</a></div>
+      <div><h5>Courses</h5><a href="#/courses">All courses</a><a href="#/class/class-10">Class 10 Economics</a><a href="#/class/class-11">Class 11 Statistics & Micro</a><a href="#/class/class-12">Class 12 Macro & IED</a><a href="#/blueprint">India's Economic Blueprint</a><a href="#/certifications">Certifications</a></div>
       <div><h5>Labs</h5><a href="#/labs">Technical Labs</a><a href="#/catalogue">500-Lab Catalogue</a><a href="#/lab/econometrics">Econometrics</a><a href="#/lab/sentiment">Sentiment Analysis</a><a href="ArthaRoshni-500-Labs-Catalogue.pdf" target="_blank" rel="noopener">Catalogue PDF</a></div>
       <div><h5>Resources</h5><a href="#/practice">Practice quizzes</a><a href="#/blogs">Blog</a><a href="#/search">Search</a><a href="#/bookmarks">Saved chapters</a><a href="https://ncert.nic.in/textbook.php" target="_blank" rel="noopener">NCERT textbooks</a></div>
       <div><h5>Company</h5><a href="#/about">About ArthaRoshni</a><a href="#/students">For Students</a><a href="#/blogs">Blog</a><a href="admin.html">Admin</a></div>
@@ -179,7 +279,7 @@ function courseCard({ href, color, grad, icon, tag, kick, title, desc, meta, rat
 
 /* -------------------------------------------------- shared marketing partials */
 function certCard(c) {
-  return `<a class="cert-card" href="${c.href}">
+  return `<a class="cert-card" href="#/cert/${c.id}">
     <div class="cert-card__banner ${c.grad}">
       <div><div class="k">CERTIFICATE PATH</div><div class="code">${esc(c.code)}</div></div>
       <span class="cert-card__verified">FREE</span>
@@ -211,8 +311,8 @@ let homeClassTab = 'class-10';   // class features section
 function homeCourseCards() {
   const list = homeCourseTab === 'all' ? HOME_COURSES : HOME_COURSES.filter(c => c.cls === homeCourseTab);
   return list.slice(0, 6).map(c => courseCard({
-    href: `#/class/${c.cls}`, grad: c.grad, icon: c.icon,
-    tag: `Class ${c.grade}`, kick: `⏱ ${c.duration} · CBSE · NCERT`, title: c.title,
+    href: `#/class/${c.cls}`, grad: c.grad, icon: icon(c.icon, 44),
+    tag: `Class ${c.grade}`, kick: `${c.duration} · CBSE · NCERT`, title: c.title,
     desc: c.desc, meta: 'Notes + quiz', rating: c.rating, tags: c.tags,
   })).join('');
 }
@@ -261,15 +361,15 @@ function viewHome() {
   </div>`).join('');
 
   const darkCards = PLATFORM_FEATURES.map(f => `<div class="dark-card">
-    <div class="ic">${f.icon}</div><h3>${esc(f.title)}</h3><p>${esc(f.desc)}</p>
+    <div class="ic">${icon(f.icon, 22)}</div><h3>${esc(f.title)}</h3><p>${esc(f.desc)}</p>
   </div>`).join('');
 
   const teacherCards = TEACHERS.map(t => `<div class="teacher">
-    <div class="av">${t.emoji}</div><b>${esc(t.name)}</b><small>${esc(t.subject)}</small>
+    <div class="av">${icon(t.emoji, 44)}</div><b>${esc(t.name)}</b><small>${esc(t.subject)}</small>
   </div>`).join('');
 
   const careerCards = CAREERS.map(c => `<div class="feature">
-    <div class="ic">${c.icon}</div><h3>${esc(c.title)}</h3><p>${esc(c.desc)}</p>
+    <div class="ic">${icon(c.icon, 22)}</div><h3>${esc(c.title)}</h3><p>${esc(c.desc)}</p>
   </div>`).join('');
 
   const blogTeasers = POSTS.slice(0, 3).map(blogCard).join('');
@@ -278,12 +378,12 @@ function viewHome() {
   return `
   <section class="mkt-hero"><div class="mkt-hero__in">
     <div>
-      <div class="hero__badge">✨ CBSE 2025-26 SYLLABUS · 100% NCERT ALIGNED</div>
+      <div class="hero__badge">${icon('sparkle', 14)} CBSE 2025-26 SYLLABUS · 100% NCERT ALIGNED</div>
       <h1>Master CBSE Economics<br><em>Classes 10, 11 & 12</em></h1>
       <p class="sub">India's free learning platform for Economics — NCERT-exact lessons, chapter quizzes with instant feedback, <b>500 hands-on technical labs</b> and a full research-skills path. Always ₹0.</p>
       <div class="mkt-hero__cta">
         <a class="c-btn c-btn--primary c-btn--lg" href="#/courses">Start learning free →</a>
-        <a class="c-btn c-btn--outline c-btn--lg" href="#/labs">▶ Explore the labs</a>
+        <a class="c-btn c-btn--outline c-btn--lg" href="#/labs">${icon('play', 15)} Explore the labs</a>
       </div>
       <div class="mkt-hero__trust">
         <div><span class="tick">✓</span> 100% free, forever</div>
@@ -315,7 +415,7 @@ G = Government Spending
         </div>
         <a class="hero-card__btn" href="#/class/class-12">Continue learning →</a>
       </div>
-      <div class="hero-float">⭐ 100% Free Forever</div>
+      <div class="hero-float">${icon('star', 13)} 100% Free Forever</div>
     </div>
   </div></section>
 
@@ -327,6 +427,25 @@ G = Government Spending
       <div><b>${s.questions}+</b><span>Practice Questions</span></div>
       <div><b>₹0</b><span>Cost, Forever</span></div>
     </div>
+  </div></section>
+
+  <section class="home-bp"><div class="home-bp__in">
+    <div class="home-bp__copy">
+      <div class="hero__badge">${icon('compass', 14)} NEW · INTERACTIVE SPECIAL</div>
+      <h2>India's Economic Blueprint</h2>
+      <p>From colonial stagnation to a $5-trillion trajectory — explore the 8-chapter architecture of the Indian economy on an interactive blueprint: a clickable India map, an animated reform pipeline and 3D infographic cards for every chapter of the IED syllabus.</p>
+      <div class="home-bp__chips">
+        ${BP_CHAPTERS.slice(0, 4).map(c => `<a class="chip" href="#/blueprint/${c.id}">${icon(c.icon, 14)} ${esc(c.short)}</a>`).join('')}
+        <a class="chip chip--more" href="#/blueprint">+4 more</a>
+      </div>
+      <a class="c-btn c-btn--primary c-btn--lg" href="#/blueprint">Open the Blueprint ${icon('arrow', 15)}</a>
+    </div>
+    <a class="home-bp__map" href="#/blueprint" aria-label="Open India's Economic Blueprint">
+      <svg viewBox="30 0 360 440" aria-hidden="true">
+        <path d="M150 18 L186 44 L206 40 L252 68 L300 84 L332 78 L356 86 L344 106 L362 130 L342 152 L318 136 L308 118 L300 150 L295 165 L272 200 L256 240 L236 288 L216 340 L196 394 L188 412 L176 396 L162 332 L150 282 L140 232 L126 202 L98 186 L72 192 L60 176 L82 160 L96 166 L100 150 L76 144 L92 128 L102 118 L116 82 L136 56 Z"/>
+        ${BP_CHAPTERS.map(c => `<circle cx="${c.node.x}" cy="${c.node.y}" r="6" class="nd" style="--node:${c.color}"/>`).join('')}
+      </svg>
+    </a>
   </div></section>
 
   <section class="mkt-sec" id="home-courses">
@@ -411,12 +530,14 @@ function viewCourses() {
     meta: `${c.subjects.flatMap(su => su.chapters).length} chapters`,
   })).join('');
   const subjectCards = CLASSES.flatMap(c => c.subjects.map(su => courseCard({
-    href: `#/class/${c.id}`, color: su.color || c.color, icon: '📚', tag: `Class ${c.grade}`,
+    href: `#/class/${c.id}`, color: su.color || c.color, icon: icon('courses', 40), tag: `Class ${c.grade}`,
     kick: c.title, title: su.title, desc: su.note || '', meta: `${su.chapters.length} chapters`,
   }))).join('');
+  const TRACK_ICONS = { python: 'code', data: 'bars', stats: 'calc', behav: 'brain', nlp: 'chat',
+    climate: 'leaf', intl: 'globe', capstone: 'gradcap', econ1: 'scatter', econ2: 'candles' };
   const trackCards = TRACK_META.map(t => {
     const n = CATALOGUE.filter(l => l.trackKey === t.key).length;
-    return courseCard({ href: `#/catalogue`, color: t.color, icon: t.icon, tag: 'Lab track',
+    return courseCard({ href: `#/catalogue`, color: t.color, icon: icon(TRACK_ICONS[t.key] || 'labs', 40), tag: 'Lab track',
       kick: 'Technical Lab', title: t.name, desc: `${n} hands-on labs to build and run for free.`, meta: `${n} labs` });
   }).join('');
 
@@ -500,6 +621,61 @@ function viewCertifications() {
     <h2>One chapter is all it takes to start</h2>
     <p>Every path is free, self-paced and works offline. Begin with the class you're in today.</p>
     <a class="c-btn c-btn--primary c-btn--lg" href="#/courses">Browse courses →</a>
+  </div></section>`;
+}
+
+/* -------------------------------------------------- CERT detail page */
+function viewCert([id]) {
+  const c = CERTS.find(x => x.id === id);
+  if (!c) return notFound();
+  const clsId = { 'ace-10': 'class-10', 'ace-11': 'class-11', 'ace-12': 'class-12' }[c.id];
+  const cls = clsId ? byClass[clsId] : null;
+  const chapters = cls ? cls.subjects.flatMap(su => su.chapters) : [];
+  const chaptersHtml = cls ? `
+    <section class="mkt-sec mkt-sec--tight">
+      <div class="mkt-sec__head"><div><h2>Chapters in this path</h2>
+        <p>Finish each one, then clear its quiz at 80%+ to keep the path on track.</p></div></div>
+      <div class="chapters-panel" style="max-width:760px">
+        ${chapters.map((ch, i) => `<a class="chp" href="${ch.status === 'ready' ? `#/read/${cls.id}/${ch.id}` : `#/class/${cls.id}`}">
+          <span class="n">${i + 1}</span><span>${esc(ch.title)}</span></a>`).join('')}
+      </div>
+    </section>` : `
+    <section class="mkt-sec mkt-sec--tight">
+      <div class="mkt-sec__head"><div><h2>Built on the 500-lab catalogue</h2>
+        <p>Pick labs across Python, data and econometrics tracks — then close with a capstone.</p></div></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="c-btn c-btn--navy" href="#/catalogue">Open the 500-lab catalogue ${icon('arrow', 14)}</a>
+        <a class="c-btn c-btn--ghost" href="#/labs">Try the interactive labs</a>
+      </div>
+    </section>`;
+
+  return `
+  <section class="page-hero"><div class="page-hero__in">
+    <div class="hero__badge">${icon('certifications', 14)} CERTIFICATE PATH · ${esc(c.code)} · FREE</div>
+    <h1>${esc(c.title)}</h1>
+    <p class="sub">${esc(c.subtitle)}</p>
+    <div class="page-hero__cta">
+      <a class="c-btn c-btn--primary c-btn--lg" href="${c.href}">Start this path ${icon('arrow', 15)}</a>
+      <a class="c-btn c-btn--outline c-btn--lg" href="#/certifications">All paths</a>
+    </div>
+  </div></section>
+
+  <section class="mkt-sec">
+    <div class="mkt-sec__head"><div><h2>The exact steps</h2>
+      <p>Your saved quiz scores are the progress record — tracked on your device, no account needed.</p></div></div>
+    <div class="steps-3">
+      ${c.steps.map((s, i) => `<div class="step-c"><div class="num">${i + 1}</div>
+        <h3>Step ${i + 1}</h3><p>${esc(s)}</p></div>`).join('')}
+    </div>
+    <div class="cert-card__tags" style="margin-top:22px">${c.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
+  </section>
+
+  ${chaptersHtml}
+
+  <section class="cta-band"><div class="cta-band__in">
+    <h2>Free from start to finish</h2>
+    <p>No fees and nothing to unlock — complete the steps and your scorecard is your proof of mastery. Downloadable certificates are coming soon.</p>
+    <a class="c-btn c-btn--primary c-btn--lg" href="${c.href}">Begin ${esc(c.code)} now →</a>
   </div></section>`;
 }
 
@@ -595,9 +771,9 @@ function viewStudents() {
   <section class="mkt-sec" style="padding-top:0">
     <div class="mkt-sec__head"><div><h2>Built for every student</h2></div></div>
     <div class="feature-grid">
-      <div class="feature"><div class="ic">📱</div><h3>Any device</h3><p>Works on a basic phone, offline, installable to your home screen.</p></div>
-      <div class="feature"><div class="ic">🧑‍🏫</div><h3>No coaching needed</h3><p>Self-paced, clearly explained, and free of cost.</p></div>
-      <div class="feature"><div class="ic">🔬</div><h3>Future-ready</h3><p>Learn Python, data & AI skills that universities and employers value.</p></div>
+      <div class="feature"><div class="ic">${icon('phone', 22)}</div><h3>Any device</h3><p>Works on a basic phone, offline, installable to your home screen.</p></div>
+      <div class="feature"><div class="ic">${icon('heart', 22)}</div><h3>No coaching needed</h3><p>Self-paced, clearly explained, and free of cost.</p></div>
+      <div class="feature"><div class="ic">${icon('labs', 22)}</div><h3>Future-ready</h3><p>Learn Python, data & AI skills that universities and employers value.</p></div>
     </div>
   </section>
 
@@ -798,7 +974,7 @@ function viewBookmarks() {
 /* -------------------------------------------------- SEARCH */
 function viewSearch() {
   return topbar('Search', 'Find any topic') + `<main class="page">
-    <div class="search-box">🔎 <input id="q" type="search" placeholder="Try “per capita income”, “GDP”, “MNC”…" autocomplete="off"></div>
+    <div class="search-box">${icon('search', 18)} <input id="q" type="search" placeholder="Try “per capita income”, “GDP”, “MNC”…" autocomplete="off"></div>
     <div id="results" class="mt"></div>
   </main>`;
 }
@@ -898,6 +1074,21 @@ function wire() {
   const tgl = document.querySelector('.js-navtoggle');
   if (tgl) tgl.addEventListener('click', () => document.querySelector('.js-mobilemenu')?.classList.toggle('open'));
 
+  // Mobile menu accordions
+  document.querySelectorAll('.js-mmgroup').forEach(b => b.addEventListener('click', () => {
+    const g = b.closest('.mm-group');
+    const wasOpen = g.classList.contains('open');
+    document.querySelectorAll('.mm-group.open').forEach(x => x.classList.remove('open'));
+    if (!wasOpen) g.classList.add('open');
+  }));
+
+  // Desktop dropdowns — keyboard/touch toggle (hover handled in CSS)
+  document.querySelectorAll('.nav-item > .nav-link').forEach(a => {
+    a.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); a.parentElement.querySelector('.nav-drop a')?.focus(); }
+    });
+  });
+
   // Sticky nav shadow on scroll
   const nav = document.querySelector('.js-sitenav');
   if (nav) nav.classList.toggle('scrolled', window.scrollY > 8);
@@ -923,8 +1114,8 @@ function wire() {
 
   // Navbar + home search -> go to search page with query
   const goSearch = val => { location.hash = '#/search'; setTimeout(() => { const q = document.getElementById('q'); if (q) { q.value = val; q.dispatchEvent(new Event('input')); } }, 0); };
-  const ns = document.querySelector('.js-navsearch');
-  if (ns) ns.addEventListener('submit', e => { e.preventDefault(); goSearch(ns.querySelector('input').value); });
+  document.querySelectorAll('.js-navsearch').forEach(ns =>
+    ns.addEventListener('submit', e => { e.preventDefault(); goSearch(ns.querySelector('input').value); }));
   const hs = document.querySelector('.js-homesearch');
   if (hs) {
     const trigger = () => goSearch(hs.value);

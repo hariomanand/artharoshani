@@ -3,55 +3,55 @@
 
 export const HOME_COURSES = [
   {
-    cls: 'class-10', grade: '10', icon: '🌱', duration: '6h 30m', rating: 4.9,
+    cls: 'class-10', grade: '10', icon: 'leaf', duration: '6h 30m', rating: 4.9,
     title: 'Development — Class 10 Economics',
     desc: 'Understand per-capita income, HDI, sustainable development and compare the goals of different communities through NCERT-aligned notes.',
     tags: ['Class 10', 'NCERT', 'Case Study'], grad: 'grad-teal',
   },
   {
-    cls: 'class-10', grade: '10', icon: '🏭', duration: '5h 45m', rating: 4.8,
+    cls: 'class-10', grade: '10', icon: 'factory', duration: '5h 45m', rating: 4.8,
     title: 'Sectors of the Indian Economy',
     desc: 'Master primary, secondary and tertiary sectors, organised vs unorganised economy and the rise of services in India.',
     tags: ['Class 10', 'Diagram-based'], grad: 'grad-navy-mid',
   },
   {
-    cls: 'class-10', grade: '10', icon: '💳', duration: '7h 10m', rating: 4.9,
+    cls: 'class-10', grade: '10', icon: 'rupee', duration: '7h 10m', rating: 4.9,
     title: 'Money and Credit',
     desc: 'From barter to digital payments — money as a medium of exchange, formal & informal credit, SHGs and the RBI’s role.',
     tags: ['Class 10', 'Real-life Examples'], grad: 'grad-amber',
   },
   {
-    cls: 'class-11', grade: '11', icon: '📈', duration: '6h 00m', rating: 4.8,
+    cls: 'class-11', grade: '11', icon: 'trendUp', duration: '6h 00m', rating: 4.8,
     title: 'Introduction to Microeconomics — Class 11',
     desc: 'Build a rock-solid foundation: scarcity, choice, PPF, demand–supply, elasticity and consumer behaviour with diagrams.',
     tags: ['Class 11', 'Foundations'], grad: 'grad-navy-deep',
   },
   {
-    cls: 'class-11', grade: '11', icon: '🏛️', duration: '8h 20m', rating: 4.9,
+    cls: 'class-11', grade: '11', icon: 'bank', duration: '8h 20m', rating: 4.9,
     title: 'Indian Economy on the Eve of Independence',
     desc: 'Analyse the colonial legacy — agricultural stagnation, zamindari, de-industrialisation and the economy of 1947.',
     tags: ['Class 11 & 12', 'History'], grad: 'grad-violet',
   },
   {
-    cls: 'class-11', grade: '11', icon: '📊', duration: '4h 50m', rating: 4.7,
+    cls: 'class-11', grade: '11', icon: 'calc', duration: '4h 50m', rating: 4.7,
     title: 'Statistics for Economics — Complete',
     desc: 'Measures of central tendency, dispersion, correlation, index numbers and presentation of data for boards.',
     tags: ['Class 11', 'Numerical'], grad: 'grad-teal',
   },
   {
-    cls: 'class-12', grade: '12', icon: '🧮', duration: '7h 00m', rating: 4.9,
+    cls: 'class-12', grade: '12', icon: 'calc', duration: '7h 00m', rating: 4.9,
     title: 'National Income Accounting — Class 12',
     desc: 'GDP, GNP, NNP at factor cost & market price — value-added, income and expenditure methods, step by step.',
     tags: ['Class 12', 'Numerical'], grad: 'grad-navy-deep',
   },
   {
-    cls: 'class-12', grade: '12', icon: '🏦', duration: '6h 40m', rating: 4.8,
+    cls: 'class-12', grade: '12', icon: 'bank', duration: '6h 40m', rating: 4.8,
     title: 'Money & Banking — Class 12 Macro',
     desc: 'Functions of money, money supply (M1), commercial banks, RBI credit creation and monetary policy instruments.',
     tags: ['Class 12', 'Concept-heavy'], grad: 'grad-navy-mid',
   },
   {
-    cls: 'class-12', grade: '12', icon: '⚖️', duration: '5h 30m', rating: 4.8,
+    cls: 'class-12', grade: '12', icon: 'scale', duration: '5h 30m', rating: 4.8,
     title: 'Government Budget & Fiscal Policy',
     desc: 'Revenue & capital receipts and expenditure, fiscal deficit, and how the Union Budget shapes daily life.',
     tags: ['Class 12', 'Current Affairs'], grad: 'grad-rose',
@@ -60,7 +60,7 @@ export const HOME_COURSES = [
 
 export const CERTS = [
   {
-    code: 'ACE-10', grad: 'grad-amber',
+    id: 'ace-10', code: 'ACE-10', grad: 'grad-amber',
     title: 'ArthaRoshni CBSE 10 Achiever',
     subtitle: 'Complete every Class 10 Economics chapter and pass all the chapter quizzes.',
     tags: ['Class 10', 'Board Exam', 'Notes + Quizzes'],
@@ -68,7 +68,7 @@ export const CERTS = [
     steps: ['Read all Class 10 chapters', 'Score 80%+ in every chapter quiz', 'Revise with bookmarks & key terms'],
   },
   {
-    code: 'ACE-11', grad: 'grad-navy-mid',
+    id: 'ace-11', code: 'ACE-11', grad: 'grad-navy-mid',
     title: 'Statistics & Micro Foundations',
     subtitle: 'Dual path covering Statistics for Economics + Intro to Micro for Class 11.',
     tags: ['Class 11', 'NCERT', 'Numericals'],
@@ -76,7 +76,7 @@ export const CERTS = [
     steps: ['Finish the Class 11 statistics chapters', 'Master the micro foundations notes', 'Clear all Class 11 quizzes at 80%+'],
   },
   {
-    code: 'ACE-12', grad: 'grad-navy-deep',
+    id: 'ace-12', code: 'ACE-12', grad: 'grad-navy-deep',
     title: 'Macro & IED Master',
     subtitle: 'National income, money & banking, the budget and India’s development journey.',
     tags: ['Class 12', 'Board Exam', 'Macro + IED'],
@@ -84,7 +84,7 @@ export const CERTS = [
     steps: ['Read every Class 12 macro & IED chapter', 'Practise national-income numericals', 'Clear all Class 12 quizzes at 80%+'],
   },
   {
-    code: 'ACE-PRO', grad: 'grad-rose',
+    id: 'ace-pro', code: 'ACE-PRO', grad: 'grad-rose',
     title: 'Research & Labs Pro',
     subtitle: 'Go beyond the syllabus — Python, data analysis and econometrics through the 500-lab catalogue.',
     tags: ['Advanced', '500 Labs', 'Python & Data'],
@@ -149,30 +149,30 @@ export const TESTIMONIALS = [
 ];
 
 export const PLATFORM_FEATURES = [
-  { icon: '📖', title: 'Visual chapter notes', desc: 'Every chapter explained with infographics, tables and connector diagrams — not walls of text.' },
-  { icon: '🔬', title: '500 technical labs', desc: 'Econometrics, Python, NLP and behavioral experiments — the skills top universities teach, free in your browser.' },
-  { icon: '📝', title: 'Board-pattern quizzes', desc: 'Chapter-wise practice with instant feedback and a real-PYQ import slot, scores tracked on your device.' },
-  { icon: '📴', title: 'Works fully offline', desc: 'Install it like an app and study even on low-network days — built for tier-2 and tier-3 cities.' },
-  { icon: '📄', title: '500-lab PDF catalogue', desc: 'The complete lab curriculum as a printable, shareable PDF — download it once, keep it forever.' },
-  { icon: '💛', title: 'Free, forever', desc: 'No fees, no login walls, no ads inside lessons. Cost should never be a barrier to world-class learning.' },
+  { icon: 'courses', title: 'Visual chapter notes', desc: 'Every chapter explained with infographics, tables and connector diagrams — not walls of text.' },
+  { icon: 'labs', title: '500 technical labs', desc: 'Econometrics, Python, NLP and behavioral experiments — the skills top universities teach, free in your browser.' },
+  { icon: 'checkSquare', title: 'Board-pattern quizzes', desc: 'Chapter-wise practice with instant feedback and a real-PYQ import slot, scores tracked on your device.' },
+  { icon: 'offline', title: 'Works fully offline', desc: 'Install it like an app and study even on low-network days — built for tier-2 and tier-3 cities.' },
+  { icon: 'file', title: '500-lab PDF catalogue', desc: 'The complete lab curriculum as a printable, shareable PDF — download it once, keep it forever.' },
+  { icon: 'heart', title: 'Free, forever', desc: 'No fees, no login walls, no ads inside lessons. Cost should never be a barrier to world-class learning.' },
 ];
 
 export const CAREERS = [
-  { icon: '📈', title: 'Economist', desc: 'Research policy, analyse data, advise governments and think tanks.' },
-  { icon: '📊', title: 'Data Analyst', desc: 'Turn Statistics + Economics into insights for top Indian firms.' },
-  { icon: '🏦', title: 'Banking Officer', desc: 'SBI PO, RBI Grade B — economics is the single biggest edge.' },
-  { icon: '🎓', title: 'Civil Services (UPSC)', desc: 'Optional subject, essay and GS-3 — all benefit from strong economics.' },
-  { icon: '📰', title: 'Financial Journalist', desc: 'Explain the Union Budget, RBI policy and markets to millions of readers.' },
-  { icon: '🏅', title: 'CUET / College Admissions', desc: 'Delhi University, Ashoka, SRCC — economics opens the best UG colleges.' },
+  { icon: 'trendUp', title: 'Economist', desc: 'Research policy, analyse data, advise governments and think tanks.' },
+  { icon: 'bars', title: 'Data Analyst', desc: 'Turn Statistics + Economics into insights for top Indian firms.' },
+  { icon: 'bank', title: 'Banking Officer', desc: 'SBI PO, RBI Grade B — economics is the single biggest edge.' },
+  { icon: 'scale', title: 'Civil Services (UPSC)', desc: 'Optional subject, essay and GS-3 — all benefit from strong economics.' },
+  { icon: 'pen', title: 'Financial Journalist', desc: 'Explain the Union Budget, RBI policy and markets to millions of readers.' },
+  { icon: 'gradcap', title: 'CUET / College Admissions', desc: 'Delhi University, Ashoka, SRCC — economics opens the best UG colleges.' },
 ];
 
 export const TEACHERS = [
-  { name: 'Macro & IED', subject: 'National income to LPG reforms', emoji: '🏦' },
-  { name: 'Micro & Statistics', subject: 'Demand, supply & data handling', emoji: '📈' },
-  { name: 'Indian Economy', subject: '1947 → today, the full story', emoji: '🏛️' },
-  { name: 'Board Strategy', subject: 'Answer writing & marking scheme', emoji: '🎯' },
-  { name: 'Python & Data', subject: 'Code-first economics labs', emoji: '🐍' },
-  { name: 'Diagrams & Cases', subject: 'Full-mark visual answers', emoji: '✏️' },
+  { name: 'Macro & IED', subject: 'National income to LPG reforms', emoji: 'bank' },
+  { name: 'Micro & Statistics', subject: 'Demand, supply & data handling', emoji: 'trendUp' },
+  { name: 'Indian Economy', subject: '1947 → today, the full story', emoji: 'pillar' },
+  { name: 'Board Strategy', subject: 'Answer writing & marking scheme', emoji: 'practice' },
+  { name: 'Python & Data', subject: 'Code-first economics labs', emoji: 'code' },
+  { name: 'Diagrams & Cases', subject: 'Full-mark visual answers', emoji: 'pen' },
 ];
 
 export const SOURCES = [
