@@ -53,24 +53,21 @@
 
 /* ---------------------------------------------- India map */
 .bp-hero__map { display: flex; justify-content: center; }
-.bp-map { width: min(100%, 430px); filter: drop-shadow(0 0 34px rgba(103, 232, 249, .18)); }
-.bp-map__land { stroke: none; }
-.bp-map__trace {
-  fill: none; stroke: var(--trace); stroke-width: 2; stroke-linejoin: round;
-  stroke-dasharray: 2600; stroke-dashoffset: 2600;
-  animation: bp-draw 2.4s ease-out forwards;
+.bp-map {
+  width: min(100%, 470px); filter: drop-shadow(0 0 34px rgba(103, 232, 249, .18));
+  border-radius: 16px; border: 1px solid rgba(103, 232, 249, .22);
 }
-@keyframes bp-draw { to { stroke-dashoffset: 0; } }
-.bp-map__link { stroke: rgba(103, 232, 249, .35); stroke-width: 1; stroke-dasharray: 4 5; }
+.bp-map__link { stroke: rgba(103, 232, 249, .45); stroke-width: 1.6; stroke-dasharray: 7 8; }
 .bp-map__node { cursor: pointer; outline: none; }
-.bp-map__node .halo { fill: var(--node); opacity: .16; animation: bp-pulse 2.2s ease-in-out infinite; }
-.bp-map__node .dot { fill: var(--paper); stroke: var(--node); stroke-width: 2; transition: fill .2s; }
-.bp-map__node .num { fill: #fff; font-size: 8px; font-weight: 800; pointer-events: none; }
+.bp-map__node .halo { fill: var(--node); opacity: .2; animation: bp-pulse 2.2s ease-in-out infinite; }
+.bp-map__node .dot { fill: var(--paper); stroke: var(--node); stroke-width: 3.5; transition: fill .2s; }
+.bp-map__node .num { fill: #fff; font-size: 15px; font-weight: 800; pointer-events: none; }
 .bp-map__node .lbl {
-  fill: var(--dim); font-size: 9px; font-weight: 600; letter-spacing: .04em;
-  opacity: 0; transition: opacity .2s; pointer-events: none;
+  fill: #e3f4fc; font-size: 17px; font-weight: 700; letter-spacing: .05em;
+  paint-order: stroke; stroke: rgba(3, 14, 28, .9); stroke-width: 4px;
+  opacity: .95; transition: opacity .2s, fill .2s; pointer-events: none;
 }
-.bp-map__node:hover .lbl, .bp-map__node:focus .lbl, .bp-map__node.active .lbl { opacity: 1; }
+.bp-map__node:hover .lbl, .bp-map__node:focus .lbl, .bp-map__node.active .lbl { opacity: 1; fill: var(--trace); }
 .bp-map__node:hover .dot, .bp-map__node:focus .dot, .bp-map__node.active .dot { fill: var(--node); }
 .bp-map__node.active .halo { opacity: .3; }
 @keyframes bp-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.35); } }

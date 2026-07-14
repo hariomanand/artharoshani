@@ -8,34 +8,26 @@ import { icon } from './icons.js';
 
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/* ---------------------------------------------- India map (stylised SVG) */
-const INDIA_PATH = `M150 18 L186 44 L206 40 L252 68 L300 84 L332 78 L356 86 L344 106
-L362 130 L342 152 L318 136 L308 118 L300 150 L295 165 L272 200 L256 240 L236 288
-L216 340 L196 394 L188 412 L176 396 L162 332 L150 282 L140 232 L126 202 L98 186
-L72 192 L60 176 L82 160 L96 166 L100 150 L76 144 L92 128 L102 118 L116 82 L136 56 Z`;
-
+/* ---------------------------------------------- India map (blueprint image + node overlay) */
 function indiaMap(activeId) {
   const links = BP_CHAPTERS.map((c, i) => {
     const n = BP_CHAPTERS[(i + 1) % BP_CHAPTERS.length].node;
     return `<line x1="${c.node.x}" y1="${c.node.y}" x2="${n.x}" y2="${n.y}" class="bp-map__link"/>`;
   }).join('');
-  const nodes = BP_CHAPTERS.map(c => `
+  const nodes = BP_CHAPTERS.map(c => {
+    const ly = c.node.labelBelow ? c.node.y + 34 : c.node.y - 24;
+    return `
     <g class="bp-map__node ${activeId === c.id ? 'active' : ''}" data-ch="${c.id}" tabindex="0" role="button"
-       aria-label="Chapter ${c.num}: ${esc(c.title)}">
-      <circle cx="${c.node.x}" cy="${c.node.y}" r="14" class="halo" style="--node:${c.color}"/>
-      <circle cx="${c.node.x}" cy="${c.node.y}" r="7.5" class="dot" style="--node:${c.color}"/>
-      <text x="${c.node.x}" y="${c.node.y + 3.4}" text-anchor="middle" class="num">${c.num}</text>
-      <text x="${c.node.x}" y="${c.node.y - 14}" text-anchor="middle" class="lbl">${esc(c.node.city)}</text>
-    </g>`).join('');
+       aria-label="Chapter ${c.num}: ${esc(c.title)} — ${esc(c.node.city)}">
+      <circle cx="${c.node.x}" cy="${c.node.y}" r="26" class="halo" style="--node:${c.color}"/>
+      <circle cx="${c.node.x}" cy="${c.node.y}" r="14" class="dot" style="--node:${c.color}"/>
+      <text x="${c.node.x}" y="${c.node.y + 4.6}" text-anchor="middle" class="num">${c.num}</text>
+      <text x="${c.node.x}" y="${ly}" text-anchor="middle" class="lbl">${esc(c.node.city)}</text>
+    </g>`;
+  }).join('');
   return `
-  <svg class="bp-map" viewBox="30 0 360 440" role="img" aria-label="Blueprint map of India with 8 chapter nodes">
-    <defs>
-      <radialGradient id="bpGlow" cx="50%" cy="45%" r="65%">
-        <stop offset="0%" stop-color="rgba(103,232,249,.14)"/><stop offset="100%" stop-color="rgba(103,232,249,0)"/>
-      </radialGradient>
-    </defs>
-    <path d="${INDIA_PATH}" class="bp-map__land" fill="url(#bpGlow)"/>
-    <path d="${INDIA_PATH}" class="bp-map__trace"/>
+  <svg class="bp-map" viewBox="0 0 922 960" role="img" aria-label="Blueprint map of India with 8 chapter nodes on their cities">
+    <image href="assets/india-blueprint.jpg" x="0" y="0" width="922" height="960" preserveAspectRatio="xMidYMid slice"/>
     ${links}${nodes}
   </svg>`;
 }
@@ -272,8 +264,8 @@ const STAGES = {
 export function renderBlueprint(chapterId) {
   const active = bpChapterById(chapterId) || BP_CHAPTERS[0];
   const stats = BLUEPRINT.heroStats.map(s => s.plain
-    ? `<div class="bp-stat"><b>${s.value}</b><span>${esc(s.label)}</span></div>`
-    : `<div class="bp-stat"><b><span class="pre">${s.prefix || ''}</span><span class="js-count" data-to="${s.value}">0</span>${s.suffix || ''}</b><span>${esc(s.label)}</span></div>`).join('');
+    ? `<div class="bp-stat"><b>${esc(String(s.value))}</b><span>${esc(s.label)}</span></div>`
+    : `<div class="bp-stat"><b>${esc(s.prefix || '')}<span class="js-count" data-to="${s.value}">0</span>${esc(s.suffix || '')}</b><span>${esc(s.label)}</span></div>`).join('');
 
   const prev = BP_CHAPTERS[active.num - 2];
   const next = BP_CHAPTERS[active.num];
@@ -346,7 +338,8 @@ export function wireBlueprint() {
     setTimeout(() => document.getElementById('bp-stage')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 40);
   }
 
-  // Count-up hero stats
+  // Count-up hero stats (setTimeout guard lands the final value even when
+  // the tab is backgrounded and requestAnimationFrame is throttled)
   page.querySelectorAll('.js-count').forEach(el => {
     const to = +el.dataset.to, t0 = performance.now(), dur = 1200;
     const tick = now => {
@@ -355,6 +348,7 @@ export function wireBlueprint() {
       if (p < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
+    setTimeout(() => { el.textContent = to; }, dur + 80);
   });
 
   // Scroll-reveal

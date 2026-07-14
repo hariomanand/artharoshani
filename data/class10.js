@@ -82,6 +82,28 @@ export default {
                 ]},
                 { type: 'callout', variant: 'warn', label: 'Sustainability', text: 'Development must be <b>sustainable</b> — the resource base must not be destroyed for future generations. Groundwater over-use and non-renewable resources (like crude oil) are warning signs.' },
               ]
+            },
+            {
+              id: 'l4', title: 'A Bihar Lens: Two Lives, One State',
+              blocks: [
+                { type: 'p', text: 'Development is the realisation of human aspirations — a process that expands our freedoms and capabilities. But because our starting points differ, our goals differ. Compare two people of the same state:' },
+                { type: 'table', headers: ['', 'Landless labourer (Araria)', 'Software professional (Patna)'], rows: [
+                  ['Development means…', 'Guaranteed days of work and a wage that arrives on time', 'Reliable internet, global clients, faster city commutes'],
+                  ['Biggest worry', 'A leaking school roof; work drying up after the floods', 'Power cuts and a two-hour commute'],
+                  ['Shared goals', 'Security, respect and freedom — the non-material goals', 'Security, respect and freedom — the same goals'],
+                ]},
+                { type: 'h', text: 'Where does Bihar stand? (latest available data)' },
+                { type: 'table', headers: ['Indicator', 'Bihar', 'India'], rows: [
+                  ['Per capita income (2022–23, approx.)', '₹60,337', '≈ ₹1.5–1.7 lakh'],
+                  ['Literacy rate', '61.8% (Census 2011)', '74% (2011) · ≈77.7% (NSO 2017)'],
+                  ['Infant Mortality Rate (SRS 2020)', '≈27 per 1,000', '≈28 per 1,000'],
+                ]},
+                { type: 'figure', title: 'Literacy comparison', caption: 'Literacy rate (%): Bihar vs India (Census 2011). Closing this gap is the surest route to higher human development.', svg: svgBar('Literacy rate', [
+                  { l: 'Bihar', v: 62, c: 'var(--c10)' }, { l: 'India', v: 74, c: 'var(--accent)' }
+                ]) },
+                { type: 'callout', variant: 'exam', label: 'Why does Bihar’s income lag?', text: 'Not because its people work less — but because <b>public facilities</b> (schools, hospitals, irrigation, roads) determine how productive work can be. Kerala’s story shows that strong public facilities lift human development even before income catches up. Notice that Bihar’s IMR is now close to the national average — proof that focused public health effort works.' },
+                { type: 'callout', variant: 'tip', label: 'Beyond income', text: 'A regular wage matters, but so does the peace of mind that a job won’t vanish tomorrow, a workplace free of discrimination, and the freedom to make life choices. Development counts all of these.' },
+              ]
             }
           ],
           keyTerms: [
@@ -147,6 +169,30 @@ export default {
                 { type: 'p', text: 'Activities are also classified by <b>who owns assets</b>: the <b>public sector</b> (owned by government — Railways, post office) and the <b>private sector</b> (owned by individuals/companies — TISCO, Reliance).' },
                 { type: 'callout', variant: 'exam', label: 'Why we need the public sector', text: 'Some activities need heavy spending that the private sector will not do (roads, dams), or must be provided at low cost (health, education). Government has a responsibility beyond profit.' },
               ]
+            },
+            {
+              id: 'l4', title: 'A Bihar Lens: The Hands that Build',
+              blocks: [
+                { type: 'flow', steps: [
+                  { title: 'Primary — the foundation', text: 'Harvesting <b>makhana</b> (fox nuts) in the wetlands of Darbhanga — Bihar grows most of India’s makhana, and “Mithila Makhana” earned a GI tag in 2022.' },
+                  { title: 'Secondary — the transformer', text: 'A rice mill in Buxar turning paddy into polished rice; a dal mill; a litchi-juice unit in Muzaffarpur.' },
+                  { title: 'Tertiary — the facilitator', text: 'A bank officer in a Patna branch, a truck driver on NH-19, a technician repairing phones in the local market.' },
+                ]},
+                { type: 'h', text: 'Interdependence: the journey of a grain' },
+                { type: 'flow', steps: [
+                  { title: 'Primary', text: 'A farmer in Rohtas grows wheat.' },
+                  { title: 'Secondary', text: 'A biscuit factory buys the wheat and turns it into packaged biscuits.' },
+                  { title: 'Tertiary', text: 'A transport truck carries the biscuits to a retail shop in Gaya — while a bank provides the credit that keeps the factory’s machines running.' },
+                ]},
+                { type: 'callout', variant: 'warn', label: 'A day in the unorganised sector', text: 'Santosh, a daily-wage construction worker in Patna, stands at the Labour Chowk by 6 AM. If it rains and the site floods — as it often does — there is no work that day. No paid leave, no health insurance, and no guarantee of a fair wage when too many labourers turn up for too few jobs. This is the unorganised sector’s harsh reality for crores of workers.' },
+                { type: 'h', text: 'Creating employment in rural Bihar' },
+                { type: 'list', items: [
+                  '<b>Irrigation & cheap credit</b> — help farmers move beyond one uncertain monsoon crop.',
+                  '<b>Cold storage</b> — Muzaffarpur’s Shahi Litchi (GI tag, 2018) rots within days; storage and processing keep its value in Bihar.',
+                  '<b>Local agro-industry</b> — dal mills, honey collection centres and makhana processing units create jobs where people live, reducing distress migration.',
+                ]},
+                { type: 'callout', variant: 'tip', label: 'Value addition stays home', text: 'When makhana is roasted, packed and branded inside Bihar instead of being sold raw, the secondary and tertiary income stays with Bihari workers — that is how sectors grow together.' },
+              ]
             }
           ],
           keyTerms: [
@@ -202,6 +248,21 @@ export default {
                 ]},
                 { type: 'callout', variant: 'tip', label: 'Self-Help Groups (SHGs)', text: 'SHGs of 15–20 members pool savings and give small loans to members. After a year or two, banks lend to the group. They provide credit to the poor <b>without collateral</b> and free them from moneylenders.' },
               ]
+            },
+            {
+              id: 'l4', title: 'A Bihar Lens: Chandu’s Goat & JEEViKA’s Women',
+              blocks: [
+                { type: 'callout', variant: 'def', label: 'Chandu and the stubborn goat', text: 'Chandu the shoemaker spent three days stitching fine leather mojris, but he needs a goat for his daughter’s wedding feast. Lakhan has a goat — a stubborn one that has already chewed through his fence — but Lakhan doesn’t want shoes; he wants a new plough! Chandu is left holding shoes, Lakhan is wrestling a goat, and no trade happens. This failed <b>double coincidence of wants</b> is exactly why money exists: it is the universal intermediate every seller accepts.' },
+                { type: 'h', text: 'Terms of credit, close to home' },
+                { type: 'list', items: [
+                  '<b>Interest rate</b> — the “price” of borrowing.',
+                  '<b>Collateral</b> — an asset pledged as guarantee: farmland in Madhubani, jewellery, livestock.',
+                  '<b>Documentation</b> — proof of identity and income (why so many poor borrowers get pushed to moneylenders).',
+                  '<b>Mode of repayment</b> — lump sum after harvest, or monthly instalments.',
+                ]},
+                { type: 'callout', variant: 'tip', label: 'JEEViKA — Bihar’s SHG revolution', text: 'Bihar’s rural livelihoods mission <b>JEEViKA</b> has organised over <b>one crore rural women</b> into lakhs of SHGs. Members pool small savings (₹25–100 a month) and lend to each other <b>without collateral</b> — bypassing the security that banks demand. The weekly meetings have become platforms where women discuss not just loans, but health, schooling and dowry.' },
+                { type: 'callout', variant: 'warn', label: 'Why formal credit matters here', text: 'In flood-prone districts, a failed crop plus a moneylender charging 5% <b>per month</b> is a ready-made debt-trap. Cheap, supervised, formal credit is not a luxury for Bihar — it is the difference between recovery and ruin.' },
+              ]
             }
           ],
           keyTerms: [
@@ -245,6 +306,20 @@ export default {
                 { type: 'callout', variant: 'exam', label: 'WTO', text: 'The World Trade Organisation aims to liberalise international trade. Though it says all countries should remove barriers, in practice developed countries have kept some of their own — an unfair aspect of trade.' },
                 { type: 'callout', variant: 'tip', label: 'Fair globalisation', text: 'Government can help by protecting workers’ interests, supporting small producers, and negotiating fairer WTO rules so benefits are shared.' },
               ]
+            },
+            {
+              id: 'l3', title: 'A Bihar Lens: Globalisation on Station Road',
+              blocks: [
+                { type: 'p', text: 'One smartphone shows how an MNC spreads production: designed in California, chips made in Taiwan, assembled in one country and supported by call centres in India — each stage placed where costs are lowest and skills are available. That is <b>profit-seeking location choice</b>, and it is why production today is spread across the globe.' },
+                { type: 'h', text: 'Impact on a Bihar shopkeeper' },
+                { type: 'table', headers: ['Gains 🌱', 'Pressures ⚠️'], rows: [
+                  ['Access to global brands and better technology on the shelf', 'Local manufacturers of simple electronics struggle to compete'],
+                  ['Lower prices thanks to efficient global supply chains', 'Pressure on wages to match mass-produced imports'],
+                  ['New services — couriers, mobile recharge, e-commerce pickup points', 'Small traders squeezed between online platforms and big retail'],
+                ]},
+                { type: 'callout', variant: 'exam', label: 'Market insight (link to economics ahead)', text: 'When an MNC enters a local market, <b>market supply increases</b> — the supply curve shifts right, so the price consumers pay tends to fall. Good for the Bihar consumer; hard on the local firm that cannot match the MNC’s scale. You will study this formally as supply, demand and equilibrium in Classes 11–12.' },
+                { type: 'callout', variant: 'tip', label: 'What helps local producers compete', text: 'Reliable electricity, all-weather roads, cheap credit and skill training — the same public facilities from Chapter 1 — decide whether a Hajipur banana-chips unit can stand up to a multinational snack brand.' },
+              ]
             }
           ],
           keyTerms: [
@@ -286,6 +361,28 @@ export default {
                 ]},
                 { type: 'callout', variant: 'tip', label: 'Standardisation logos', text: '<b>ISI</b> marks industrial goods, <b>Agmark</b> certifies agricultural products, and <b>Hallmark</b> certifies the purity of gold. They assure quality.' },
                 { type: 'callout', variant: 'warn', label: 'Right to Information (RTI) 2005', text: 'The RTI Act ensures citizens can get information about the functioning of government departments, strengthening the consumer’s hand.' },
+              ]
+            },
+            {
+              id: 'l3', title: 'A Bihar Lens: Using Your Rights',
+              blocks: [
+                { type: 'p', text: 'Exploitation in the bazaar is rarely dramatic — it is an under-weighed sack of grain, adulterated mustard oil, a price above MRP charged “because of the season”. Your rights exist precisely for these everyday moments.' },
+                { type: 'h', text: 'The six consumer rights' },
+                { type: 'list', ordered: true, items: [
+                  '<b>Right to Safety</b> — a new electric iron should not give you a shock.',
+                  '<b>Right to be Informed</b> — MRP, weight, ingredients, expiry date must be visible.',
+                  '<b>Right to Choose</b> — no shopkeeper can force one brand of tea on you.',
+                  '<b>Right to be Heard</b> — your complaint must be acknowledged.',
+                  '<b>Right to Seek Redressal</b> — a faulty product deserves a refund or replacement.',
+                  '<b>Right to Consumer Education</b> — the right to become an informed buyer.',
+                ]},
+                { type: 'callout', variant: 'tip', label: 'RTI in action — Muzaffarpur', text: 'A student hasn’t received her state scholarship. She files an RTI: “What is the status of my application? Which officer is responsible for the delay?” The moment a named officer must answer in writing, files start moving. Information is power — use it.' },
+                { type: 'flow', steps: [
+                  { title: 'District Commission', text: 'Complaints up to ₹50 lakh — your first stop for local disputes.' },
+                  { title: 'State Commission', text: 'Claims from ₹50 lakh to ₹2 crore, and appeals from the District level.' },
+                  { title: 'National Commission', text: 'Claims above ₹2 crore — the country’s apex consumer court.' },
+                ]},
+                { type: 'callout', variant: 'exam', label: 'Update: CPA 2019', text: 'The <b>Consumer Protection Act 2019</b> has replaced COPRA 1986. It keeps the three-tier system (with the higher money limits above), adds rules for <b>e-commerce</b> sellers, allows complaints to be filed from where the <b>consumer</b> lives, and created a Central Consumer Protection Authority (CCPA). For history questions, COPRA 1986 remains the landmark that started it all.' },
               ]
             }
           ],

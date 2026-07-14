@@ -10,6 +10,8 @@ import { POSTS, postById } from '../data/blog.js';
 import { icon } from './icons.js';
 import { renderBlueprint, wireBlueprint } from './blueprint.js';
 import { BP_CHAPTERS } from '../data/blueprint.js';
+import { QBANK, QBANK_TOTAL, qbFind } from '../data/qbank.js';
+import { buildOptions } from './mcq.js';
 
 const app = document.getElementById('app');
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -28,6 +30,7 @@ const routes = {
   read: viewRead,
   quiz: viewQuiz,
   practice: viewPractice,
+  qbank: viewQBank,
   bookmarks: viewBookmarks,
   search: viewSearch,
   about: viewAbout,
@@ -63,6 +66,7 @@ function render() {
   let active = name;
   if (['lab', 'catalogue', 'lab-item'].includes(name)) active = 'labs';
   if (['class', 'read', 'quiz', 'blueprint'].includes(name)) active = 'courses';
+  if (name === 'qbank') active = 'practice';
   if (name === 'blog') active = 'blogs';
   if (name === 'cert') active = 'certifications';
   app.innerHTML = siteHeader(active) + view(params) + siteFooter();
@@ -920,15 +924,42 @@ function viewQuiz([classId, chapterId]) {
 }
 
 /* -------------------------------------------------- PRACTICE hub */
+function qbBestLabel(groupId, chId) {
+  const sc = Store.score('qb:' + groupId + '/' + chId);
+  return sc ? `<span class="tag tag--ready">Best ${sc.best}/${sc.total}</span>` : '';
+}
+
 function viewPractice() {
+  // Class + chapter-wise authentic question bank (Bihar Board / CBSE, Classes X-XII)
+  const groupSections = QBANK.groups.map(g => {
+    const gc = gradeColor(g.grade);
+    const rows = g.chapters.map(ch => `
+      <a class="chapter-row" href="#/qbank/${g.id}/${ch.id}">
+        <div class="chapter-row__num" style="background:${gc}22;color:${gc}">${ch.num}</div>
+        <div class="chapter-row__body">
+          <h4>${esc(ch.title)}</h4>
+          <p><span>${ch.count} questions</span> ${qbBestLabel(g.id, ch.id)}</p>
+        </div>
+        <div class="chapter-row__chev">›</div>
+      </a>`).join('');
+    const gtotal = g.chapters.reduce((s, c) => s + c.count, 0);
+    return `
+      <div class="section-title" style="color:${gc}">
+        <span>${esc(g.title)}</span>
+        <span style="margin-left:auto;font-weight:700;color:var(--ink-faint)">${g.chapters.length} chapters · ${gtotal} Q</span>
+      </div>
+      ${rows}`;
+  }).join('');
+
+  // Keep the original instant-feedback MCQ quizzes (curriculum-linked, seeded)
   const ready = allReadyChapters();
-  const cards = ready.map(({ cls, ch }) => {
+  const mcqCards = ready.map(({ cls, ch }) => {
     const sc = Store.score(ch.id);
     return `<a class="chapter-row" href="#/quiz/${cls.id}/${ch.id}">
       <div class="chapter-row__num" style="background:${gradeColor(cls.grade)}22;color:${gradeColor(cls.grade)}">${cls.grade}</div>
       <div class="chapter-row__body">
         <h4>${esc(ch.title)}</h4>
-        <p><span>${(ch.questions || []).filter(q => q.type !== 'subjective').length} questions</span>
+        <p><span>${(ch.questions || []).filter(q => q.type !== 'subjective').length} MCQs</span>
           ${sc ? `<span class="tag tag--ready">Best ${sc.best}/${sc.total}</span>` : ''}</p>
       </div>
       <div class="chapter-row__chev">›</div>
@@ -939,14 +970,113 @@ function viewPractice() {
   <section class="page-hero"><div class="page-hero__in">
     <div class="hero__badge">📝 Practice · chapter-wise question bank</div>
     <h1>Practice until it sticks</h1>
-    <p class="sub">Exam-style questions for every ready chapter, with instant feedback and best scores saved on your device. Authentic CBSE PYQs can be imported into the same bank.</p>
+    <p class="sub">${QBANK_TOTAL.toLocaleString()}+ authentic questions across Classes X, XI & XII — organised chapter by chapter. Tap any chapter to open its own quiz page: take it as an <b>MCQ quiz</b> with instant feedback, or flip through <b>flashcards</b>. Everything saves on your device, works offline, stays free.</p>
   </div></section>
   <main class="page">
     <div class="callout callout--exam"><div class="callout__label">🎯 About this bank</div>
-      <p>These are exam-style <b>practice</b> questions mapped to each chapter. Authentic CBSE past-year questions can be imported into the same bank — see <a href="#/about" style="color:inherit;text-decoration:underline">About → Import PYQs</a>.</p></div>
-    <div class="section-title">Pick a chapter</div>
-    ${cards}
+      <p>These ${QBANK_TOTAL.toLocaleString()} Q&amp;A are drawn from the Bihar Economics question bank, mapped to every NCERT chapter. Each chapter opens on its <b>own page</b> in two modes: <b>MCQ</b> — the wrong options are pooled from other real answers in the bank (nothing invented) — or <b>flashcards</b>, where you reveal the answer and grade yourself.</p></div>
+    ${groupSections}
+    <div class="divider" style="margin-top:26px"></div>
+    <div class="section-title">🧩 Instant-feedback MCQ quizzes</div>
+    <p class="muted" style="margin:0 4px 12px;font-size:13.5px">Multiple-choice quizzes with auto-scoring for the fully-written chapters.</p>
+    ${mcqCards || '<p class="muted" style="margin:0 4px">Coming soon.</p>'}
   </main>`;
+}
+
+/* -------------------------------------------------- QBANK · chapter flashcard quiz */
+const qbankState = {};
+function qbKey(groupId, chapterId) { return groupId + '/' + chapterId; }
+function qbFresh(n, shuffle, mode) {
+  const order = Array.from({ length: n }, (_, i) => i);
+  if (shuffle) for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  return { mode: mode || 'mcq', order, i: 0, known: 0, correct: 0, revealed: false, answered: false, picked: null, opts: null, done: false, shuffled: !!shuffle };
+}
+
+function viewQBank(params) {
+  const [groupId, chapterId] = params;
+  const found = qbFind(groupId, chapterId);
+  if (!found) return notFound();
+  const { group, chapter } = found;
+  const qs = chapter.questions;
+  const key = qbKey(groupId, chapterId);
+  const gc = gradeColor(group.grade);
+
+  if (!qbankState[key]) qbankState[key] = qbFresh(qs.length, false, 'mcq');
+  const st = qbankState[key];
+  const back = topbar(chapter.title, group.title, { back: '#/practice' });
+
+  const modeBar = `<div class="qb-modes">
+    <button class="qb-mode ${st.mode === 'mcq' ? 'active' : ''} js-qb-mode" data-key="${key}" data-mode="mcq">🅰 MCQ quiz</button>
+    <button class="qb-mode ${st.mode === 'cards' ? 'active' : ''} js-qb-mode" data-key="${key}" data-mode="cards">🃏 Flashcards</button>
+  </div>`;
+
+  let body;
+  if (st.done) {
+    const total = st.order.length;
+    const got = st.mode === 'mcq' ? st.correct : st.known;
+    const pctVal = total ? Math.round((got / total) * 100) : 0;
+    Store.saveScore('qb:' + key, got, total);
+    const r = 54, circ = 2 * Math.PI * r, off = circ * (1 - pctVal / 100);
+    body = `<div class="scorecard">
+      <svg class="ring" viewBox="0 0 130 130">
+        <circle cx="65" cy="65" r="${r}" fill="none" stroke="var(--line)" stroke-width="12"/>
+        <circle cx="65" cy="65" r="${r}" fill="none" stroke="${pctVal >= 60 ? 'var(--ok)' : 'var(--danger)'}" stroke-width="12"
+          stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${off}" transform="rotate(-90 65 65)"/>
+        <text x="65" y="72" text-anchor="middle" font-size="28" font-weight="800" fill="var(--ink)">${pctVal}%</text>
+      </svg>
+      <h2>${got} / ${total} ${st.mode === 'mcq' ? 'correct' : 'knew it'}</h2>
+      <p class="muted">${pctVal >= 80 ? 'Excellent! 🎉' : pctVal >= 60 ? 'Solid — revise the ones you missed.' : 'Keep drilling — reread the chapter and retry.'}</p>
+      <div class="btn-row">
+        <button class="btn js-qb-retry" data-key="${key}">🔁 Retry</button>
+        <button class="btn btn--ghost js-qb-shuffle" data-key="${key}" data-n="${qs.length}">🔀 Shuffle &amp; retry</button>
+      </div>
+      <a class="btn btn--ghost" href="#/practice" style="margin-top:10px">← All chapters</a>
+    </div>`;
+  } else if (st.mode === 'mcq') {
+    const total = st.order.length;
+    const qi = st.order[st.i];
+    const q = qs[qi];
+    if (!st.opts) st.opts = buildOptions(groupId, chapterId, q.q, q.a);
+    const opts = st.opts.list.map((o, idx) => {
+      let cls2 = '';
+      if (st.answered) { if (idx === st.opts.answer) cls2 = 'correct'; else if (idx === st.picked) cls2 = 'wrong'; }
+      return `<button class="quiz-opt ${cls2} js-qbm-opt" data-key="${key}" data-idx="${idx}" ${st.answered ? 'disabled' : ''}>
+        <span class="key">${String.fromCharCode(65 + idx)}</span><span>${esc(o)}</span></button>`;
+    }).join('');
+    body = `${modeBar}
+      <div class="quiz-progress">
+        <div class="pbar"><i style="width:${(st.i / total) * 100}%;background:${gc}"></i></div>
+        <span class="quiz-count">${st.i + 1}/${total}</span>
+      </div>
+      <div class="block"><p style="font-weight:700;font-size:17px">${esc(q.q)}</p></div>
+      <div class="quiz-opts">${opts}</div>
+      ${st.answered
+        ? `<div class="explain"><b>Answer:</b> ${String.fromCharCode(65 + st.opts.answer)}. ${esc(q.a)}</div>
+           <button class="btn mt js-qbm-next" data-key="${key}">${st.i + 1 < total ? 'Next question →' : 'See results →'}</button>`
+        : `<p class="qb-note">Wrong options are real answers from elsewhere in this bank — pick the one that fits this question.</p>`}`;
+  } else {
+    const total = st.order.length;
+    const qi = st.order[st.i];
+    const q = qs[qi];
+    body = `${modeBar}
+      <div class="quiz-progress">
+        <div class="pbar"><i style="width:${(st.i / total) * 100}%;background:${gc}"></i></div>
+        <span class="quiz-count">${st.i + 1}/${total}</span>
+      </div>
+      <div class="qb-card">
+        <div class="qb-card__tag" style="color:${gc}">Q${st.i + 1} · ${esc(chapter.title)}</div>
+        <p class="qb-card__q">${esc(q.q)}</p>
+        ${st.revealed
+          ? `<div class="qb-card__a"><span class="qb-card__alabel">Answer</span>${esc(q.a)}</div>
+             <div class="qb-grade-row">
+               <button class="btn btn--ghost js-qb-grade" data-key="${key}" data-known="0">↻ Review again</button>
+               <button class="btn js-qb-grade" data-key="${key}" data-known="1">✓ I knew it</button>
+             </div>`
+          : `<button class="btn js-qb-reveal" data-key="${key}">Reveal answer</button>`}
+      </div>`;
+  }
+
+  return back + `<main class="page">${body}</main>`;
 }
 
 /* -------------------------------------------------- BOOKMARKS */
@@ -1151,6 +1281,51 @@ function wire() {
 
   document.querySelectorAll('.js-retry').forEach(b => b.addEventListener('click', () => {
     quizState[b.dataset.ch] = { i: 0, correct: 0, answered: false, done: false };
+    render();
+  }));
+
+  // QBank quiz — mode toggle (MCQ / flashcards)
+  document.querySelectorAll('.js-qb-mode').forEach(b => b.addEventListener('click', () => {
+    const st = qbankState[b.dataset.key];
+    if (st && st.mode === b.dataset.mode) return;
+    qbankState[b.dataset.key] = qbFresh(st.order.length, st.shuffled, b.dataset.mode);
+    render();
+  }));
+
+  // QBank MCQ mode
+  document.querySelectorAll('.js-qbm-opt:not([disabled])').forEach(o => o.addEventListener('click', () => {
+    const st = qbankState[o.dataset.key]; if (!st || st.answered) return;
+    st.picked = +o.dataset.idx; st.answered = true;
+    if (st.picked === st.opts.answer) st.correct++;
+    render();
+  }));
+  document.querySelectorAll('.js-qbm-next').forEach(b => b.addEventListener('click', () => {
+    const st = qbankState[b.dataset.key]; if (!st) return;
+    st.answered = false; st.picked = null; st.opts = null; st.i++;
+    if (st.i >= st.order.length) st.done = true;
+    render();
+  }));
+
+  // QBank flashcard mode
+  document.querySelectorAll('.js-qb-reveal').forEach(b => b.addEventListener('click', () => {
+    const st = qbankState[b.dataset.key]; if (!st) return;
+    st.revealed = true; render();
+  }));
+  document.querySelectorAll('.js-qb-grade').forEach(b => b.addEventListener('click', () => {
+    const st = qbankState[b.dataset.key]; if (!st) return;
+    if (b.dataset.known === '1') st.known++;
+    st.revealed = false; st.i++;
+    if (st.i >= st.order.length) st.done = true;
+    render();
+  }));
+  document.querySelectorAll('.js-qb-retry').forEach(b => b.addEventListener('click', () => {
+    const st = qbankState[b.dataset.key];
+    qbankState[b.dataset.key] = qbFresh(st ? st.order.length : +b.dataset.n, st ? st.shuffled : false, st ? st.mode : 'mcq');
+    render();
+  }));
+  document.querySelectorAll('.js-qb-shuffle').forEach(b => b.addEventListener('click', () => {
+    const st = qbankState[b.dataset.key];
+    qbankState[b.dataset.key] = qbFresh(+b.dataset.n, true, st ? st.mode : 'mcq');
     render();
   }));
 

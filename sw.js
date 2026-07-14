@@ -1,5 +1,5 @@
 // ArthaRoshni service worker — cache-first, offline-ready. No backend needed.
-const CACHE = 'arthapath-v7';
+const CACHE = 'arthapath-v11';
 const ASSETS = [
   './',
   './index.html',
@@ -8,12 +8,14 @@ const ASSETS = [
   './css/blueprint.css',
   './manifest.webmanifest',
   './assets/icons/icon.svg',
+  './assets/india-blueprint.jpg',
   './js/app.js',
   './js/icons.js',
   './js/blueprint.js',
   './data/blueprint.js',
   './js/blocks.js',
   './js/store.js',
+  './js/mcq.js',
   './js/labs.js',
   './js/supabase.js',
   './js/content.js',
@@ -21,6 +23,7 @@ const ASSETS = [
   './data/class10.js',
   './data/class11.js',
   './data/class12.js',
+  './data/qbank.js',
   './data/labs.js',
   './data/catalogue.js',
   './data/site.js',

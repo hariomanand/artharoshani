@@ -20,7 +20,7 @@ export const BP_CHAPTERS = [
     era: 'Pre-1947', short: 'Colonial Baseline',
     title: 'The Colonial Baseline',
     tagline: 'A structurally stagnant economy engineered to serve another country.',
-    node: { x: 295, y: 165, city: 'Kolkata', note: 'Capital of British India till 1911' },
+    node: { x: 659, y: 449, city: 'Kolkata', note: 'Capital of British India till 1911' },
     facts: [
       { icon: 'trendUp', k: 'GDP growth', v: '< 1% a year', d: 'Aggregate output barely moved for decades — the textbook definition of stagnation.' },
       { icon: 'factory', k: 'Industry', v: 'Low & extractive', d: 'Indigenous handicrafts collapsed; modern industry was tiny and foreign-owned.' },
@@ -53,7 +53,7 @@ export const BP_CHAPTERS = [
     era: '1947–1990', short: 'Planning Era',
     title: 'The Foundations of Independence',
     tagline: 'Five-Year Plans, a mixed economy and the Green Revolution.',
-    node: { x: 130, y: 78, city: 'Punjab', note: 'Heartland of the Green Revolution' },
+    node: { x: 376, y: 221, city: 'Punjab', note: 'Heartland of the Green Revolution' },
     goals: {
       title: 'The Planning Era (1950–1990)', center: 'Mixed Economy Framework',
       items: [
@@ -82,7 +82,7 @@ export const BP_CHAPTERS = [
     era: '1991', short: '1991 Pivot',
     title: 'The 1991 Inflection Point',
     tagline: 'Crisis, a $7 billion loan, and the L-P-G reforms that rewired India.',
-    node: { x: 150, y: 95, city: 'New Delhi', note: 'The New Economic Policy is announced' },
+    node: { x: 381, y: 290, labelBelow: true, city: 'New Delhi', note: 'The New Economic Policy is announced' },
     crisis: 'Driven by a balance of payments crisis, India secured a $7 billion loan from the World Bank/IMF — triggering the New Economic Policy.',
     lpg: [
       { icon: 'chain', t: 'Liberalisation', d: 'Deregulating the industrial sector, removing restrictive licensing, and opening the financial sector.' },
@@ -99,7 +99,7 @@ export const BP_CHAPTERS = [
     era: 'Post-1991', short: 'Growth Pillars',
     title: 'Structural Pillars & Growth Drivers',
     tagline: 'Infrastructure, digital rails, manufacturing and a services superpower.',
-    node: { x: 128, y: 222, city: 'Mumbai', note: 'Financial capital' },
+    node: { x: 251, y: 555, city: 'Mumbai', note: 'Financial capital' },
     pillars: [
       { icon: 'road', t: 'Infrastructure', stat: '>30 km/day', d: 'National highway network expansion, urban transport (metros), logistics & connectivity.' },
       { icon: 'chip', t: 'Digital economy', stat: 'Billions of transactions monthly', d: 'Digital Public Infrastructure (UPI, Aadhaar), internet penetration growth, FinTech revolution, startup ecosystem.' },
@@ -117,7 +117,7 @@ export const BP_CHAPTERS = [
     era: 'Chapter 5', short: 'Human Capital',
     title: 'The Foundations of Human Capital',
     tagline: 'Education and health — the core sources of a productive nation.',
-    node: { x: 185, y: 330, city: 'Bengaluru', note: 'India’s talent & tech hub' },
+    node: { x: 381, y: 730, city: 'Bengaluru', note: 'India’s talent & tech hub' },
     venn: { a: 'Education', b: 'Health', caption: 'The core sources of human capital.' },
     compare: [
       { t: 'Human Capital', accent: '#f5b301', d: 'Treats human beings as a means to an end. Focuses on increasing economic productivity (e.g., an unhealthy worker is less productive).' },
@@ -133,7 +133,7 @@ export const BP_CHAPTERS = [
     era: 'Chapter 6', short: 'Rural India',
     title: 'The Rural Lifeline',
     tagline: 'Credit, cooperatives and the quiet revolution of Self-Help Groups.',
-    node: { x: 205, y: 258, city: 'Hyderabad', note: 'SHG movement stronghold' },
+    node: { x: 407, y: 599, city: 'Hyderabad', note: 'SHG movement stronghold' },
     flow: {
       apex: { t: 'NABARD', d: 'Apex body for rural credit' },
       mid: [{ t: 'Formal Banking Sector' }, { t: 'Cooperative Banks' }],
@@ -151,7 +151,7 @@ export const BP_CHAPTERS = [
     era: 'Chapter 7', short: 'Employment',
     title: 'The Paradox of Jobless Growth',
     tagline: 'GDP grew — but did the people? Work, informality and sustainability.',
-    node: { x: 236, y: 298, city: 'Chennai', note: 'Manufacturing & services corridor' },
+    node: { x: 446, y: 722, labelBelow: true, city: 'Chennai', note: 'Manufacturing & services corridor' },
     paradox: {
       title: 'Workforce participation numbers obscure the reality of where and how people are working.',
       gdpLabel: 'Total GDP growth (post-reform era)',
@@ -174,7 +174,7 @@ export const BP_CHAPTERS = [
     era: 'Future horizon', short: 'Global Emergence',
     title: 'The Global Emergence',
     tagline: 'Comparative development — and the road to an economic powerhouse.',
-    node: { x: 105, y: 178, city: 'GIFT City', note: 'India’s global finance gateway' },
+    node: { x: 239, y: 444, city: 'GIFT City', note: 'India’s global finance gateway' },
     compare3: {
       title: 'The Global Radar: Comparative Development',
       cols: ['India', 'China', 'Pakistan'],
