@@ -1,1 +1,4 @@
-/admin /admin.html 200
+# Do NOT add "/admin /admin.html 200" here.
+# Cloudflare Pages already serves admin.html at the clean URL /admin, and it
+# 308-redirects /admin.html -> /admin. A rewrite to /admin.html therefore loops
+# forever (ERR_TOO_MANY_REDIRECTS).
