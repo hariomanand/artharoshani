@@ -6,7 +6,10 @@ import { getSupabase } from './supabase.js';
 import { labById, LABS } from '../data/labs.js';
 import { CATALOGUE, TRACK_META } from '../data/catalogue.js';
 import { syncFromCloud, extraMedia } from './content.js';
-import { HOME_COURSES, CERTS, CLASS_FEATURES, TESTIMONIALS, PLATFORM_FEATURES, CAREERS, TEACHERS, SOURCES } from '../data/site.js';
+// TESTIMONIALS is intentionally not imported: the homepage testimonial section was
+// removed because those quotes were placeholders from the design mock, not real
+// students. data/site.js keeps them for when real, attributable ones exist.
+import { HOME_COURSES, CERTS, CLASS_FEATURES, PLATFORM_FEATURES, CAREERS, TEACHERS, SOURCES } from '../data/site.js';
 import { POSTS, postById } from '../data/blog.js';
 import { icon } from './icons.js';
 import { renderBlueprint, wireBlueprint } from './blueprint.js';
@@ -385,15 +388,6 @@ function viewHome() {
   const courseTabs = [['all', 'All courses'], ['class-10', 'Class 10'], ['class-11', 'Class 11'], ['class-12', 'Class 12']]
     .map(([k, l]) => `<button class="tab js-hometab ${homeCourseTab === k ? 'active' : ''}" data-tab="${k}">${l}</button>`).join('');
 
-  const testis = TESTIMONIALS.map(t => `<div class="testi-card">
-    <div class="stars">★★★★★</div>
-    <blockquote>“${esc(t.quote)}”</blockquote>
-    <div class="who">
-      <span class="av">${esc(t.name.charAt(0))}</span>
-      <div><b>${esc(t.name)}</b><small>${esc(t.role)}</small><div class="score">${esc(t.score)}</div></div>
-    </div>
-  </div>`).join('');
-
   const darkCards = PLATFORM_FEATURES.map(f => `<div class="dark-card">
     <div class="ic">${icon(f.icon, 22)}</div><h3>${esc(f.title)}</h3><p>${esc(f.desc)}</p>
   </div>`).join('');
@@ -509,11 +503,6 @@ G = Government Spending
     ${classFeaturesSection()}
   </div></section>
 
-  <section class="mkt-sec">
-    <div class="mkt-sec__head"><div><h2>Real Students. Real Progress.</h2>
-      <p>What learners say about studying with ArthaRoshni.</p></div></div>
-    <div class="testi-grid">${testis}</div>
-  </section>
 
   <section class="dark-sec"><div class="dark-sec__in">
     <h2>Accelerate Your Learning with ArthaRoshni's Platform</h2>

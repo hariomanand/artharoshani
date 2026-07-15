@@ -71,12 +71,66 @@
   <link rel="stylesheet" href="css/auth.css" />
 </head>
 <body>
+  <!--
+    Everything inside #app is replaced by js/app.js on boot (render() sets
+    app.innerHTML). It exists so that crawlers, AI assistants and no-JS visitors
+    get the real content instead of a "Loading…" shell — this page is the only
+    indexable URL on the site, because the router uses hash routes.
+    Keep this copy in sync with the homepage and llms.txt.
+  -->
   <div id="app">
-    <div class="boot">
-      <div class="boot__logo">₹</div>
-      <p>Loading ArthaRoshni…</p>
+    <div class="prerender">
+      <div class="boot__logo" aria-hidden="true">₹</div>
+      <h1>ArthaRoshni — Free CBSE Economics for Classes 10, 11 &amp; 12</h1>
+      <p><strong>ArthaRoshni</strong> is India's free, offline-first learning platform for CBSE
+        Economics. It covers the complete NCERT syllabus for Class 10, Class 11 and Class 12 with
+        chapter-wise notes, hand-drawn infographics and diagrams, a 2,800+ question practice bank,
+        500 hands-on technical labs, and four free certification paths. No fees, no subscription,
+        and every chapter works offline once loaded.</p>
+
+      <h2>What you can study</h2>
+      <ul>
+        <li><strong>Class 10 Economics</strong> — Development, Sectors of the Indian Economy, Money
+          and Credit, Globalisation, and Consumer Rights, each with a "Bihar Lens" chapter grounding
+          the theory in local data.</li>
+        <li><strong>Class 11 — Statistics for Economics &amp; Indian Economic Development</strong> —
+          all 8 IED chapters written in full: the colonial drain of wealth, planning and the Green
+          Revolution, the 1991 LPG reforms, human capital, rural development, employment, environment,
+          and a India–China–Pakistan comparison.</li>
+        <li><strong>Class 12 — Introductory Macroeconomics &amp; Microeconomics</strong> — national
+          income, money and banking, determination of income and employment, consumer behaviour,
+          production and costs, and market forms.</li>
+        <li><strong>India's Economic Blueprint</strong> — an interactive 8-chapter special tracing the
+          Indian economy from 1947 to a $5-trillion trajectory, with a clickable India map.</li>
+      </ul>
+
+      <h2>Practice and labs</h2>
+      <p>Over 2,800 authentic short-answer and multiple-choice questions across 29 chapters, with
+        instant feedback, flashcard mode and saved scores. The 500-lab technical catalogue spans ten
+        tracks — Python for economics, data visualisation, statistics, econometrics I and II,
+        behavioural economics, NLP, climate economics, international and development economics, and
+        capstone projects — all runnable free in Google Colab. Labs require a free account.</p>
+
+      <h2>Free certification paths</h2>
+      <p>Four structured paths — ACE-10, ACE-11, ACE-12 and PRO — take you from Class 10 foundations
+        to research-ready data skills. Finish the chapters, clear the quizzes; the path is free from
+        start to finish.</p>
+
+      <p><a href="#/courses">Browse all courses</a> · <a href="#/class/class-10">Class 10</a> ·
+         <a href="#/class/class-11">Class 11</a> · <a href="#/class/class-12">Class 12</a> ·
+         <a href="#/practice">Practice questions</a> · <a href="#/blueprint">India's Economic Blueprint</a> ·
+         <a href="#/certifications">Certifications</a> · <a href="#/blogs">Blog</a> ·
+         <a href="#/about">About</a> · <a href="llms.txt">llms.txt</a></p>
+
+      <p class="prerender__boot">Loading ArthaRoshni…</p>
     </div>
   </div>
+  <noscript>
+    <p style="max-width:70ch;margin:16px auto;padding:12px;border:1px solid #e2e8f0;border-radius:8px;font:14px system-ui;color:#334155">
+      ArthaRoshni is an interactive app and needs JavaScript for quizzes, labs and the Blueprint.
+      The full syllabus summary above is readable without it.
+    </p>
+  </noscript>
 
   <script type="module" src="js/app.js"></script>
   <script>

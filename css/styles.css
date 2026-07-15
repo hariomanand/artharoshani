@@ -67,6 +67,21 @@ img { max-width: 100%; }
   background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff;
 }
 
+/* Static content crawlers read before js/app.js replaces #app. Users see it for
+   only a moment, so it is styled as a readable summary rather than a bare dump. */
+.prerender {
+  max-width: 70ch; margin: 0 auto; padding: 48px 20px 64px;
+  color: var(--ink-soft); font-size: 15px; line-height: 1.65;
+}
+.prerender h1 { font-size: 26px; color: var(--ink); margin: 18px 0 12px; line-height: 1.25; }
+.prerender h2 { font-size: 18px; color: var(--ink); margin: 26px 0 8px; }
+.prerender p { margin-bottom: 12px; }
+.prerender ul { margin: 0 0 12px 20px; }
+.prerender li { margin-bottom: 8px; }
+.prerender a { color: var(--primary); font-weight: 600; }
+.prerender strong { color: var(--ink); }
+.prerender__boot { margin-top: 24px; font-size: 13px; color: var(--ink-faint); }
+
 /* App shell */
 .app { max-width: var(--maxw); margin: 0 auto; min-height: 100vh; padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px); }
 
