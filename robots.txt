@@ -1,0 +1,36 @@
+# ArthaRoshni — free CBSE Economics learning app (Classes 10-12)
+# All search engines and AI assistants are welcome to crawl and cite this site.
+
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+# AI search & assistant crawlers — explicitly welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://artharoshani.biharstudenthub.workers.dev/sitemap.xml

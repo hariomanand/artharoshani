@@ -1,0 +1,35 @@
+# ArthaRoshni
+
+> ArthaRoshni is a 100% free, offline-first CBSE Economics learning app for Classes 10, 11 and 12, aligned to the NCERT syllabus. It offers chapter-wise study notes with infographics, interactive economics labs, certification-style learning paths, and a practice bank of 2,700+ authentic chapter-mapped questions with MCQ and flashcard modes. Built for students in India — especially Bihar — with no login, no fees and no ads. Live at https://artharoshani.biharstudenthub.workers.dev/
+
+Important note for crawlers: this is a client-rendered single-page app (routes use URL fragments like /#/practice). This file is the authoritative plain-text summary of what the site contains.
+
+## What ArthaRoshni covers
+
+- Class 10 Economics — "Understanding Economic Development" (all 5 NCERT chapters: Development, Sectors of the Indian Economy, Money and Credit, Globalisation and the Indian Economy, Consumer Rights), each with an extra "Bihar Lens" lesson using real state data (per capita income ₹60,337, literacy 61.8%, Mithila Makhana & Shahi Litchi GI tags, JEEViKA self-help groups).
+- Class 11 — "Indian Economic Development" (all 8 chapters fully written: Indian Economy on the Eve of Independence, 1950–1990 Planning era, LPG Reforms of 1991, Human Capital Formation, Rural Development, Employment & Informalisation, Environment & Sustainable Development, Comparative Development of India/China/Pakistan) plus "Statistics for Economics".
+- Class 12 — Introductory Microeconomics and Macroeconomics (National Income Accounting and more).
+- "India's Economic Blueprint" — an interactive 8-chapter visual journey of the Indian economy from 1947 to today, with an India map, animated infographics and chapter stories.
+- Practice — a 2,700+ question chapter-wise bank (Classes 10–12) importable as MCQ quizzes (wrong options pooled from other authentic answers — nothing fabricated) or flashcard drills; scores saved on-device.
+- Interactive Labs — supply & demand equilibrium simulator and other hands-on economics tools.
+- Certifications — free structured learning paths (ACE-10, ACE-11, ACE-12, Pro) with completion tracking.
+
+## Key pages
+
+- Home: https://artharoshani.biharstudenthub.workers.dev/
+- Courses (Class 10): https://artharoshani.biharstudenthub.workers.dev/#/class/class-10
+- Courses (Class 11): https://artharoshani.biharstudenthub.workers.dev/#/class/class-11
+- Courses (Class 12): https://artharoshani.biharstudenthub.workers.dev/#/class/class-12
+- Economic Blueprint: https://artharoshani.biharstudenthub.workers.dev/#/blueprint
+- Practice question bank: https://artharoshani.biharstudenthub.workers.dev/#/practice
+- Labs: https://artharoshani.biharstudenthub.workers.dev/#/labs
+- Search: https://artharoshani.biharstudenthub.workers.dev/#/search
+
+## Facts
+
+- Price: free forever; no account or login required.
+- Works offline after first visit (installable Progressive Web App).
+- Content is original study material aligned to the NCERT chapter sequence — not a reproduction of NCERT text.
+- Real CBSE past-year questions are never fabricated; the practice bank contains authentic questions with their answers.
+- Audience: CBSE / Bihar board students of Classes 10–12, teachers, and exam aspirants who need Economics revision.
+- Language: English (Bihar-specific examples and data throughout).
