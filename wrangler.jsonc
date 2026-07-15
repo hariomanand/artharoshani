@@ -1,8 +1,8 @@
 {
-  // Deploy ArthaRoshni as a static site on Cloudflare Workers (assets-only, no server code).
+  // Deploy ArthaRoshni to Cloudflare Pages (project: artharoshani → https://artharoshani.pages.dev).
+  // Manual deploy:  npx wrangler login   (once)   then   npx wrangler pages deploy
+  // Or connect the GitHub repo in the Cloudflare dashboard for auto-deploy on every push.
   "name": "artharoshani",
   "compatibility_date": "2025-01-01",
-  "assets": {
-    "directory": "."
-  }
+  "pages_build_output_dir": "."
 }

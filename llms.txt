@@ -1,6 +1,6 @@
 # ArthaRoshni
 
-> ArthaRoshni is a 100% free, offline-first CBSE Economics learning app for Classes 10, 11 and 12, aligned to the NCERT syllabus. It offers chapter-wise study notes with infographics, interactive economics labs, certification-style learning paths, and a practice bank of 2,700+ authentic chapter-mapped questions with MCQ and flashcard modes. Built for students in India — especially Bihar — with no login, no fees and no ads. Live at https://artharoshani.biharstudenthub.workers.dev/
+> ArthaRoshni is a 100% free, offline-first CBSE Economics learning app for Classes 10, 11 and 12, aligned to the NCERT syllabus. It offers chapter-wise study notes with infographics, interactive economics labs, certification-style learning paths, and a practice bank of 2,700+ authentic chapter-mapped questions with MCQ and flashcard modes. Built for students in India — especially Bihar — with no login, no fees and no ads. Live at https://artharoshani.pages.dev/
 
 Important note for crawlers: this is a client-rendered single-page app (routes use URL fragments like /#/practice). This file is the authoritative plain-text summary of what the site contains.
 
@@ -16,14 +16,14 @@ Important note for crawlers: this is a client-rendered single-page app (routes u
 
 ## Key pages
 
-- Home: https://artharoshani.biharstudenthub.workers.dev/
-- Courses (Class 10): https://artharoshani.biharstudenthub.workers.dev/#/class/class-10
-- Courses (Class 11): https://artharoshani.biharstudenthub.workers.dev/#/class/class-11
-- Courses (Class 12): https://artharoshani.biharstudenthub.workers.dev/#/class/class-12
-- Economic Blueprint: https://artharoshani.biharstudenthub.workers.dev/#/blueprint
-- Practice question bank: https://artharoshani.biharstudenthub.workers.dev/#/practice
-- Labs: https://artharoshani.biharstudenthub.workers.dev/#/labs
-- Search: https://artharoshani.biharstudenthub.workers.dev/#/search
+- Home: https://artharoshani.pages.dev/
+- Courses (Class 10): https://artharoshani.pages.dev/#/class/class-10
+- Courses (Class 11): https://artharoshani.pages.dev/#/class/class-11
+- Courses (Class 12): https://artharoshani.pages.dev/#/class/class-12
+- Economic Blueprint: https://artharoshani.pages.dev/#/blueprint
+- Practice question bank: https://artharoshani.pages.dev/#/practice
+- Labs: https://artharoshani.pages.dev/#/labs
+- Search: https://artharoshani.pages.dev/#/search
 
 ## Facts
 
