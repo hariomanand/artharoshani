@@ -140,6 +140,22 @@ create table if not exists public.announcements (
   created_at timestamptz not null default now()
 );
 
+-- ---------- REVIEWS (real, from signed-in learners; admin-moderated) ----------
+-- No seeded/placeholder rows: every review here is written by a real account.
+-- `approved` gates publication and is admin-only (see guard_review_approval).
+create table if not exists public.reviews (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  role_label text,                                     -- "Class 12, Patna" / "Economics Teacher, Gaya"
+  user_type text,                                      -- student | teacher | professional | other
+  rating int not null check (rating between 1 and 5),
+  quote text not null check (char_length(quote) between 20 and 600),
+  approved boolean not null default false,
+  created_at timestamptz not null default now(),
+  unique (user_id)                                     -- one review per account
+);
+
 -- ---------- LAB CATALOGUE DOWNLOAD REQUESTS ----------
 -- Every PDF catalogue download is recorded with a stated purpose.
 create table if not exists public.lab_downloads (
@@ -161,6 +177,7 @@ alter table public.media         enable row level security;
 alter table public.labs          enable row level security;
 alter table public.announcements enable row level security;
 alter table public.lab_downloads enable row level security;
+alter table public.reviews       enable row level security;
 
 -- PROFILES: users see only their own row; admins see all.
 -- Users may update their own row, but guard_profile_role() blocks role changes.
@@ -197,6 +214,49 @@ drop policy if exists ann_read on public.announcements;
 create policy ann_read on public.announcements for select using (true);
 drop policy if exists ann_write on public.announcements;
 create policy ann_write on public.announcements for all using (public.is_admin()) with check (public.is_admin());
+
+-- REVIEWS: the public reads only APPROVED ones; authors see their own pending
+-- review; a signed-in user may write/edit only their own. Same lesson as roles —
+-- RLS is row-level, not column-level, so a self-update policy would also let a
+-- user set approved=true. The trigger below is the real boundary.
+drop policy if exists reviews_read on public.reviews;
+create policy reviews_read on public.reviews for select
+  using (approved or user_id = auth.uid() or public.is_admin());
+drop policy if exists reviews_insert on public.reviews;
+create policy reviews_insert on public.reviews for insert
+  with check (auth.uid() is not null and user_id = auth.uid());
+drop policy if exists reviews_update on public.reviews;
+create policy reviews_update on public.reviews for update
+  using (user_id = auth.uid() or public.is_admin())
+  with check (user_id = auth.uid() or public.is_admin());
+drop policy if exists reviews_delete on public.reviews;
+create policy reviews_delete on public.reviews for delete
+  using (user_id = auth.uid() or public.is_admin());
+
+create or replace function public.guard_review_approval()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    -- Nobody self-publishes: a new review is always pending, whatever was sent.
+    if not public.is_admin() then new.approved := false; end if;
+    return new;
+  end if;
+  -- On edit, only an admin may flip `approved`; an author editing their own text
+  -- sends it back to pending so changes are re-checked before going public.
+  if new.approved is distinct from old.approved and not public.is_admin() then
+    raise exception 'Only an admin may publish a review';
+  end if;
+  if not public.is_admin() and new.quote is distinct from old.quote then
+    new.approved := false;
+  end if;
+  new.user_id := old.user_id;
+  return new;
+end; $$;
+
+drop trigger if exists on_review_write_guard on public.reviews;
+create trigger on_review_write_guard
+  before insert or update on public.reviews
+  for each row execute function public.guard_review_approval();
 
 -- LAB DOWNLOADS: a signed-in user may log their own request; only admins read.
 drop policy if exists dl_insert on public.lab_downloads;

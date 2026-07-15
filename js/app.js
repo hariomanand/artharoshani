@@ -20,6 +20,7 @@ import {
   Auth, wireAuth, viewLogin, viewSignup as viewAuthSignup, viewVerify,
   viewForgot, viewReset, viewLocked,
 } from './auth.js';
+import { loadReviews, reviewsSection, viewReview, wireReviews } from './reviews.js';
 
 const app = document.getElementById('app');
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -71,6 +72,7 @@ const routes = {
   forgot: viewForgot,
   reset: viewReset,
   account: viewAccount,
+  review: () => viewReview(topbar),
 };
 
 function viewBlueprint([chapterId]) { return renderBlueprint(chapterId); }
@@ -503,6 +505,7 @@ G = Government Spending
     ${classFeaturesSection()}
   </div></section>
 
+  ${reviewsSection(icon)}
 
   <section class="dark-sec"><div class="dark-sec__in">
     <h2>Accelerate Your Learning with ArthaRoshni's Platform</h2>
@@ -1332,6 +1335,7 @@ function wire() {
 
   // Account forms (sign up / in / verify / reset / sign out)
   wireAuth(render);
+  wireReviews(render);
 
   // Quiz option click
   document.querySelectorAll('.quiz-opt:not([disabled])').forEach(o => o.addEventListener('click', () => {
@@ -1501,4 +1505,6 @@ Auth.init(render).then(() => {
   // After first paint, pull any admin edits / uploaded media from the cloud
   // (no-op when offline or not configured), then repaint.
   syncFromCloud(() => render());
+  // Published reviews load in the background; the homepage repaints when they land.
+  loadReviews(() => render());
 });

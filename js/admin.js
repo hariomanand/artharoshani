@@ -88,7 +88,7 @@ async function renderShell() {
     return;
   }
 
-  const tabs = [['dash', '📊 Dashboard'], ['content', '📝 Notes'], ['media', '📎 Media/PPT'], ['labs', '🔬 Labs'], ['users', '👥 Users'], ['downloads', '⬇️ Downloads'], ['signups', '✉️ Signups'], ['ann', '📢 Announce']];
+  const tabs = [['dash', '📊 Dashboard'], ['content', '📝 Notes'], ['media', '📎 Media/PPT'], ['labs', '🔬 Labs'], ['reviews', '⭐ Reviews'], ['users', '👥 Users'], ['downloads', '⬇️ Downloads'], ['signups', '✉️ Signups'], ['ann', '📢 Announce']];
   root.innerHTML = `<div class="adm-shell">
     <div class="adm-top"><div class="logo">₹</div><h1>ArthaRoshni Admin</h1>
       <div class="who">${esc(prof?.full_name || user.email)} <button class="js-out">Sign out</button></div></div>
@@ -109,6 +109,7 @@ async function renderPane() {
   if (tab === 'content') return renderContent(pane);
   if (tab === 'media') return renderMediaTab(pane);
   if (tab === 'labs') return renderLabsTab(pane);
+  if (tab === 'reviews') return renderReviews(pane);
   if (tab === 'users') return renderUsers(pane);
   if (tab === 'downloads') return renderDownloads(pane);
   if (tab === 'signups') return renderSignups(pane);
@@ -123,8 +124,12 @@ async function renderDash(pane) {
     <div class="adm-card"><h2>Quick actions</h2>
     <div class="grid2"><button class="btn js-go" data-t="content">📝 Edit notes</button>
     <button class="btn btn--accent js-go" data-t="media">📎 Upload PPT / infographic</button></div></div>`;
-  const [c, m, l, u, d] = await Promise.all([count('content'), count('media'), count('labs'), count('profiles'), count('lab_downloads')]);
-  pane.querySelector('#stats').innerHTML = [['Registered users', u], ['Catalogue downloads', d], ['Content edits', c], ['Media files', m], ['Labs', l]]
+  const pendingReviews = async () => {
+    try { const { count } = await sb.from('reviews').select('*', { count: 'exact', head: true }).eq('approved', false); return count ?? 0; }
+    catch { return 0; }
+  };
+  const [c, m, l, u, d, rp] = await Promise.all([count('content'), count('media'), count('labs'), count('profiles'), count('lab_downloads'), pendingReviews()]);
+  pane.querySelector('#stats').innerHTML = [['Registered users', u], ['Reviews awaiting approval', rp], ['Catalogue downloads', d], ['Content edits', c], ['Media files', m], ['Labs', l]]
     .map(([k, v]) => `<div class="dash-stat"><b>${v}</b><span>${k}</span></div>`).join('');
   pane.querySelectorAll('.js-go').forEach(b => b.addEventListener('click', () => { tab = b.dataset.t; renderShell(); }));
 }
@@ -238,6 +243,53 @@ async function renderSignups(pane) {
     <span class="role">${esc(r.klass || '—')}</span>
     <span class="muted" style="font-size:12px">${esc((r.created_at || '').slice(0, 10))}</span>
   </div>`).join('') || '<p class="muted">No signups yet.</p>';
+}
+
+/* --- Reviews moderation --- */
+// Reviews are written by real signed-in learners and stay unpublished until an
+// admin approves them here. Nothing is ever auto-published or seeded.
+async function renderReviews(pane) {
+  pane.innerHTML = `<div class="adm-card">
+    <div class="adm-card__head"><div><h2>Reviews</h2>
+      <p class="sub">Real reviews from signed-in learners. Approve one and it appears on the homepage; nothing is published until you do.</p></div></div>
+    <div class="adm-substats" id="rstats"></div>
+    <div id="list">Loading…</div></div>`;
+  const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
+  const box = pane.querySelector('#list');
+  if (error) { box.innerHTML = `<p class="muted">${esc(error.message)}</p>`; return; }
+  const rows = data || [];
+  const pending = rows.filter(r => !r.approved).length;
+  pane.querySelector('#rstats').innerHTML =
+    `<span class="pill">${rows.length} total</span>
+     <span class="pill">${rows.length - pending} published</span>
+     <span class="pill">${pending} awaiting review</span>`;
+
+  box.innerHTML = rows.length ? rows.map(r => `<div class="user-row">
+    <div class="user-row__main">
+      <b>${esc(r.name)}</b>
+      <span class="role ${r.approved ? 'admin' : ''}">${r.approved ? 'published' : 'pending'}</span>
+      <span class="muted" style="font-size:12px;margin-left:auto">${esc((r.created_at || '').slice(0, 10))}</span>
+    </div>
+    <div class="user-row__grid">
+      <span>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)} ${r.rating}/5</span>
+      <span>${esc(r.role_label || '—')}</span>
+    </div>
+    <p class="dl-purpose">${esc(r.quote)}</p>
+    <div class="user-row__act">
+      <button class="chip js-appr" data-id="${r.id}" data-v="${r.approved ? 'false' : 'true'}">${r.approved ? 'Unpublish' : '✓ Approve & publish'}</button>
+      <button class="chip js-del" data-id="${r.id}" style="color:var(--danger)">Delete</button>
+    </div>
+  </div>`).join('') : '<p class="muted">No reviews yet. They appear here as soon as a learner submits one.</p>';
+
+  box.querySelectorAll('.js-appr').forEach(b => b.addEventListener('click', async () => {
+    const { error } = await sb.from('reviews').update({ approved: b.dataset.v === 'true' }).eq('id', b.dataset.id);
+    error ? toast(error.message, 'err') : (toast(b.dataset.v === 'true' ? 'Published ✓' : 'Unpublished', 'ok'), renderReviews(pane));
+  }));
+  box.querySelectorAll('.js-del').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('Delete this review permanently?')) return;
+    const { error } = await sb.from('reviews').delete().eq('id', b.dataset.id);
+    error ? toast(error.message, 'err') : (toast('Deleted', 'ok'), renderReviews(pane));
+  }));
 }
 
 /* CSV export helper — quotes every field, downloads client-side. */

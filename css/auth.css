@@ -174,3 +174,55 @@
   .dl-modal { padding: 20px 16px; }
   .dl-actions { flex-direction: column-reverse; }
 }
+
+/* ---------------------------------------------- reviews */
+/* Honest empty state: shown until real, approved reviews exist. */
+.rev-invite {
+  text-align: center; max-width: 620px; margin: 0 auto;
+  background: #fff; border: 1px solid var(--slate-200); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 40px 28px;
+}
+.rev-invite__star {
+  width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 16px;
+  background: var(--amber-400); color: var(--navy-950);
+  display: flex; align-items: center; justify-content: center; font-size: 25px;
+}
+.rev-invite h2 { font-size: 24px; font-weight: 800; color: var(--navy-900); margin-bottom: 10px; }
+.rev-invite p { color: var(--slate-600); font-size: 15px; line-height: 1.65; margin-bottom: 22px; }
+.rev-invite__actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.rev-invite .c-btn--outline {
+  background: #fff; border: 1px solid var(--slate-300); color: var(--navy-800) !important; backdrop-filter: none;
+}
+.rev-invite .c-btn--outline:hover { background: var(--navy-50); border-color: var(--navy-300); }
+.rev-pending {
+  margin-top: 18px; font-size: 13.5px; font-weight: 600; color: #14532d;
+  background: var(--ok-soft); border: 1px solid #a7d8b8; border-radius: 9px;
+  padding: 9px 14px; display: inline-block;
+}
+#home-reviews { text-align: center; }
+#home-reviews .testi-grid, #home-reviews .mkt-sec__head { text-align: left; }
+
+/* star rating picker */
+.rate { display: flex; gap: 4px; }
+.rate__s {
+  background: none; border: 0; cursor: pointer; padding: 2px;
+  font-size: 30px; line-height: 1; color: var(--slate-300);
+  transition: color .12s, transform .12s;
+}
+.rate__s:hover { transform: scale(1.12); }
+.rate__s.on { color: var(--amber-400); }
+.auth-f textarea {
+  width: 100%; padding: 11px 13px; font: inherit; font-size: 15px; font-weight: 400;
+  color: var(--navy-900); background: #fff; resize: vertical;
+  border: 1px solid var(--slate-300); border-radius: 10px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.auth-f textarea:focus {
+  outline: none; border-color: var(--navy-500); box-shadow: 0 0 0 3px rgba(58, 101, 164, .15);
+}
+@media (max-width: 560px) {
+  .rev-invite { padding: 30px 18px; }
+  .rev-invite h2 { font-size: 21px; }
+  .rev-invite__actions { flex-direction: column; }
+  .rev-invite__actions .c-btn { width: 100%; justify-content: center; }
+}

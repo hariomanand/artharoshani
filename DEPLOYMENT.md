@@ -150,6 +150,15 @@ Supabase → **Authentication → URL Configuration** → set **Site URL** to `h
 - **Locked** content: `#/labs`, every individual lab, and the 500-lab catalogue require a signed-in account. A signed-out visitor sees a "Sign in to open the labs" screen and is returned to where they were after logging in.
 - **Public** (still free, still indexable): the home/marketing pages, chapter notes, quizzes, practice bank and the India Blueprint.
 
+## Reviews (real ones only)
+
+The homepage review section is fed entirely by real, signed-in learners — there are no seeded or placeholder quotes, by design.
+
+- Any signed-in student/teacher can write one review at **`#/review`** (star rating, a short description like "Class 12, Patna", and their text). One review per account; they can edit or delete their own.
+- **Nothing publishes automatically.** A new review lands in the admin **⭐ Reviews** tab as *pending*; it appears on the homepage only after you click **Approve & publish**. The Dashboard shows a "Reviews awaiting approval" count.
+- The database enforces this, not just the UI: a trigger forces `approved = false` on insert and rejects any non-admin trying to flip it, so nobody can self-publish. Editing an approved review sends it back to pending for a re-check.
+- Until a real review is approved, the homepage shows an honest invitation ("We don't publish made-up testimonials…") with a **Write a review** button instead of fake quotes.
+
 ## The 500-lab catalogue & gated download
 
 - The catalogue lists **10 labs per page** with a pager (500 labs → 50 pages), plus search and track/level filters.
@@ -163,6 +172,7 @@ Supabase → **Authentication → URL Configuration** → set **Site URL** to `h
 | 📝 Notes | Override/expand any chapter's notes & questions (publishes instantly) |
 | 📎 Media/PPT | Upload PPT, PDF, infographics or notes → appear on the chapter page |
 | 🔬 Labs | Edit lab titles, taglines & descriptions |
+| ⭐ Reviews | Approve/unpublish/delete real learner reviews — nothing reaches the homepage until you approve it |
 | 👥 Users | Full user records (name, role, email, phone, organisation, joined) — search, filter, promote/demote admins, **export CSV** |
 | ⬇️ Downloads | Everyone who downloaded the catalogue, with their stated purpose — search, **export CSV** |
 | 📢 Announce | Post an announcement banner |
