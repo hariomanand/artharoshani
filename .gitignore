@@ -6,3 +6,6 @@ node_modules/
 .vscode/
 .idea/
 dist/
+
+# Stray notebook, not part of the site
+corporatedata.ipynb
