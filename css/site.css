@@ -75,7 +75,9 @@ h1, h2, h3, h4, .font-display, .brand, .topbar__title {
   position: relative; z-index: 1;
 }
 .announce__msg { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.announce__msg > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.announce__msg > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+/* The duplicated copy inside the track exists only for the seamless mobile loop. */
+.announce__track > span + span { display: none; }
 .announce__new {
   background: var(--amber-400); color: var(--navy-950);
   font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
@@ -110,14 +112,20 @@ h1, h2, h3, h4, .font-display, .brand, .topbar__title {
 }
 
 /* Mobile: the CTA stays visible (it used to be display:none, which hid the
-   Blueprint link entirely). The message becomes a self-scrolling marquee
-   instead of an ellipsis, so the full sentence is still readable. */
+   Blueprint link entirely). The message becomes a self-scrolling marquee.
+   The clip + fade mask live on the WRAPPER SPAN (not .announce__msg), so the
+   scrolling text is cut off before it can slide over the "New" badge. */
 @media (max-width: 640px) {
   .announce__in { padding: 7px 12px; gap: 10px; }
-  .announce__msg { flex: 1; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent); mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent); }
-  .announce__track { display: flex; width: max-content; animation: announce-scroll 22s linear infinite; }
+  .announce__msg { flex: 1; min-width: 0; }
+  .announce__msg > span:last-child {
+    flex: 1; overflow: hidden; text-overflow: clip;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+  }
+  .announce__track { display: inline-flex; width: max-content; animation: announce-scroll 22s linear infinite; }
   .announce__track > span { padding-right: 40px; white-space: nowrap; }
-  .announce__msg > span:last-child { overflow: visible; text-overflow: clip; }
+  .announce__track > span + span { display: inline; }
   .announce__cta { font-size: 12px; }
 }
 

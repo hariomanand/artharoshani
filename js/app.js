@@ -1,8 +1,7 @@
 import { CLASSES, byClass, findChapter, allReadyChapters, stats } from '../data/index.js';
 import { renderBlocks } from './blocks.js';
 import { Store } from './store.js';
-import { renderLabsHub, renderLab, wireLabs, renderCatalogue, renderCatalogueLab, setDownloadHandler } from './labs.js';
-import { getSupabase } from './supabase.js';
+import { renderLabsHub, renderLab, wireLabs, renderCatalogue, renderCatalogueLab } from './labs.js';
 import { labById, LABS } from '../data/labs.js';
 import { CATALOGUE, TRACK_META } from '../data/catalogue.js';
 import { syncFromCloud, extraMedia } from './content.js';
@@ -16,10 +15,7 @@ import { renderBlueprint, wireBlueprint } from './blueprint.js';
 import { BP_CHAPTERS } from '../data/blueprint.js';
 import { QBANK, QBANK_TOTAL, qbFind } from '../data/qbank.js';
 import { buildOptions } from './mcq.js';
-import {
-  Auth, wireAuth, viewLogin, viewSignup as viewAuthSignup, viewVerify,
-  viewForgot, viewReset, viewLocked,
-} from './auth.js';
+import { Auth, wireAuth, viewLogin, viewSignup as viewAuthSignup, viewLocked } from './auth.js';
 import { loadReviews, reviewsSection, viewReview, wireReviews } from './reviews.js';
 
 const app = document.getElementById('app');
@@ -68,9 +64,6 @@ const routes = {
   // auth
   login: viewLogin,
   signup: p => viewAuthSignup(p[0] ? decodeURIComponent(p[0]) : '#/labs'),
-  verify: viewVerify,
-  forgot: viewForgot,
-  reset: viewReset,
   account: viewAccount,
   review: () => viewReview(topbar),
 };
@@ -1428,74 +1421,6 @@ function wire() {
     if (confirm('Reset all your progress, bookmarks and scores?')) { Store.reset(); location.hash = '#/'; render(); }
   }));
 }
-
-/* -------------------------------------------------- catalogue download gate */
-const CATALOGUE_PDF = 'ArthaRoshni-500-Labs-Catalogue.pdf';
-
-function openDownloadGate() {
-  // Labs are gated, so a visitor reaching this is already signed in — but guard anyway.
-  if (!Auth.isAuthed()) { try { sessionStorage.setItem('ar.returnTo', '#/catalogue'); } catch {} location.hash = '#/login'; return; }
-  const p = Auth.profile() || {};
-  const back = document.createElement('div');
-  back.className = 'dl-backdrop';
-  back.innerHTML = `
-    <div class="dl-modal" role="dialog" aria-modal="true" aria-labelledby="dl-h">
-      <h2 id="dl-h">Download the 500-lab catalogue</h2>
-      <p class="dl-sub">Confirm your details and tell us how you'll use it. We record each download to keep the catalogue free and improve it.</p>
-      <form class="auth-form js-dlform" novalidate>
-        <label class="auth-f">Name <span class="req">*</span>
-          <input name="name" type="text" required value="${esc(p.full_name || '')}" placeholder="Your name">
-        </label>
-        <label class="auth-f">Email <span class="req">*</span>
-          <input name="email" type="email" required value="${esc(p.email || Auth.user()?.email || '')}" placeholder="you@example.com">
-        </label>
-        <label class="auth-f">How will you use the catalogue? <span class="req">*</span>
-          <textarea name="purpose" rows="3" required placeholder="e.g. Planning a Class 12 economics project on inflation."></textarea>
-        </label>
-        <div class="auth-msg js-msg" hidden></div>
-        <div class="dl-actions">
-          <button type="button" class="dl-cancel js-dl-cancel">Cancel</button>
-          <button type="submit" class="c-btn c-btn--primary js-dl-submit">Download PDF ⬇️</button>
-        </div>
-      </form>
-    </div>`;
-  document.body.appendChild(back);
-  document.body.style.overflow = 'hidden';
-
-  const close = () => { back.remove(); document.body.style.overflow = ''; };
-  back.addEventListener('click', e => { if (e.target === back) close(); });
-  back.querySelector('.js-dl-cancel').addEventListener('click', close);
-  document.addEventListener('keydown', function onEsc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); } });
-
-  back.querySelector('.js-dlform').addEventListener('submit', async e => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const name = (fd.get('name') || '').trim();
-    const email = (fd.get('email') || '').trim();
-    const purpose = (fd.get('purpose') || '').trim();
-    const msg = back.querySelector('.js-msg');
-    const showErr = t => { msg.hidden = false; msg.className = 'auth-msg js-msg auth-msg--err'; msg.textContent = t; };
-    if (!name || !email || purpose.length < 5) return showErr('Please fill in your name, email and a brief purpose.');
-
-    const btn = back.querySelector('.js-dl-submit');
-    btn.disabled = true; btn.textContent = 'Saving…';
-    try {
-      const sb = await getSupabase();
-      if (sb) {
-        await sb.from('lab_downloads').insert({
-          user_id: Auth.user()?.id, name, email, purpose, organisation: p.organisation || null,
-        });
-      }
-    } catch { /* recording is best-effort; never block the learner's download */ }
-
-    // Trigger the download, then close.
-    const a = document.createElement('a');
-    a.href = CATALOGUE_PDF; a.download = CATALOGUE_PDF; a.rel = 'noopener';
-    document.body.appendChild(a); a.click(); a.remove();
-    close();
-  });
-}
-setDownloadHandler(openDownloadGate);
 
 /* -------------------------------------------------- boot */
 // Resolve the session before the first paint, otherwise a signed-in user would

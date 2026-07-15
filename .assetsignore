@@ -16,3 +16,5 @@ wrangler.jsonc
 .gitattributes
 *.md
 *.py
+# Downloads are disabled site-wide: never serve the catalogue PDF.
+*.pdf

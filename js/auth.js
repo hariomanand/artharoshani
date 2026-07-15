@@ -124,7 +124,7 @@ export function viewSignup(returnTo = '#/labs') {
       </label>
       <label class="auth-f">Email <span class="req">*</span>
         <input name="email" type="email" required autocomplete="email" placeholder="you@example.com">
-        <small>We'll send a 6-digit code here to verify your account.</small>
+        <small>You'll use this to sign in. Never shown publicly.</small>
       </label>
       <label class="auth-f">Phone <span class="opt">optional</span>
         <input name="phone" type="tel" autocomplete="tel" placeholder="+91 98765 43210">
@@ -150,27 +150,9 @@ export function viewSignup(returnTo = '#/labs') {
     `Already have an account? <a href="#/login">Sign in</a>`);
 }
 
-export function viewVerify(params) {
-  if (!CLOUD_ENABLED) return offlineNotice();
-  const email = decodeURIComponent(params[0] || '');
-  return authShell('Verify your email', `Enter the 6-digit code sent to ${email || 'your inbox'}.`, `
-    <form class="auth-form js-verify" data-email="${esc(email)}" novalidate>
-      <label class="auth-f">6-digit code
-        <input name="token" inputmode="numeric" pattern="[0-9]*" maxlength="6" required
-               autocomplete="one-time-code" placeholder="123456" class="auth-otp">
-      </label>
-      <div class="auth-msg js-msg" hidden></div>
-      <button class="c-btn c-btn--primary c-btn--lg auth-submit js-submit" type="submit">Verify &amp; continue →</button>
-      <button class="auth-link js-resend" type="button">Didn't get it? Resend code</button>
-      <p class="auth-note">The code expires in about an hour. Check your spam folder if it hasn't arrived.</p>
-    </form>`,
-    `<a href="#/signup">← Use a different email</a>`);
-}
-
 export function viewLogin(params) {
   if (!CLOUD_ENABLED) return offlineNotice();
-  const flash = params[0] === 'verified' ? 'Email verified — please sign in to continue.'
-    : params[0] === 'reset' ? 'Password updated — please sign in with your new password.'
+  const flash = params[0] === 'created' ? 'Account created — sign in with your email and password.'
     : '';
   return authShell('Sign in', 'Welcome back to ArthaRoshni.', `
     <form class="auth-form js-login" novalidate>
@@ -186,48 +168,9 @@ export function viewLogin(params) {
       </label>
       <div class="auth-msg js-msg" hidden></div>
       <button class="c-btn c-btn--primary c-btn--lg auth-submit js-submit" type="submit">Sign in →</button>
-      <a class="auth-link" href="#/forgot">Forgot your password?</a>
+      <p class="auth-note">Forgot your password? Write to us from your registered email and we'll reset it.</p>
     </form>`,
     `New to ArthaRoshni? <a href="#/signup">Create a free account</a>`);
-}
-
-export function viewForgot() {
-  if (!CLOUD_ENABLED) return offlineNotice();
-  return authShell('Reset your password', "We'll email you a 6-digit code.", `
-    <form class="auth-form js-forgot" novalidate>
-      <label class="auth-f">Email
-        <input name="email" type="email" required autocomplete="email" placeholder="you@example.com">
-      </label>
-      <div class="auth-msg js-msg" hidden></div>
-      <button class="c-btn c-btn--primary c-btn--lg auth-submit js-submit" type="submit">Send reset code →</button>
-    </form>`,
-    `<a href="#/login">← Back to sign in</a>`);
-}
-
-export function viewReset(params) {
-  if (!CLOUD_ENABLED) return offlineNotice();
-  const email = decodeURIComponent(params[0] || '');
-  return authShell('Choose a new password', `Enter the code sent to ${email || 'your inbox'} and your new password.`, `
-    <form class="auth-form js-pwreset" data-email="${esc(email)}" novalidate>
-      <label class="auth-f">6-digit code
-        <input name="token" inputmode="numeric" pattern="[0-9]*" maxlength="6" required
-               autocomplete="one-time-code" placeholder="123456" class="auth-otp">
-      </label>
-      <label class="auth-f">New password
-        <span class="auth-pw">
-          <input name="password" type="password" required autocomplete="new-password" placeholder="At least 8 characters">
-          <button type="button" class="auth-eye js-eye" aria-label="Show password">show</button>
-        </span>
-        <span class="pw-meter"><span class="pw-meter__bar js-pwbar"></span></span>
-        <small class="js-pwhint">Hint: 8+ characters mixing capitals, small letters, a number and a symbol.</small>
-      </label>
-      <label class="auth-f">Confirm new password
-        <input name="confirm" type="password" required autocomplete="new-password" placeholder="Re-enter your password">
-      </label>
-      <div class="auth-msg js-msg" hidden></div>
-      <button class="c-btn c-btn--primary c-btn--lg auth-submit js-submit" type="submit">Update password →</button>
-    </form>`,
-    `<a href="#/login">← Back to sign in</a>`);
 }
 
 /* The screen shown when a signed-out visitor hits a locked lab route. */
@@ -271,9 +214,9 @@ const busy = (form, on, label) => {
 function friendly(error) {
   const m = (error?.message || '').toLowerCase();
   if (m.includes('invalid login credentials')) return 'That email and password combination is not correct.';
-  if (m.includes('email not confirmed')) return 'Please verify your email first — check your inbox for the code.';
-  if (m.includes('token has expired') || m.includes('expired')) return 'That code has expired. Request a new one.';
-  if (m.includes('invalid') && m.includes('token')) return 'That code is not correct. Please re-check and try again.';
+  // Appears only if "Confirm email" is still ON in Supabase Auth settings —
+  // it must be OFF, since this site sends no emails (see DEPLOYMENT.md).
+  if (m.includes('email not confirmed')) return 'This account is not activated yet. Please try again later.';
   if (m.includes('already registered') || m.includes('already been registered')) return 'An account with this email already exists. Try signing in instead.';
   if (m.includes('rate limit') || m.includes('too many') || m.includes('security purposes')) return 'Too many attempts. Please wait a minute and try again.';
   if (m.includes('password')) return error.message;
@@ -334,35 +277,14 @@ export function wireAuth(rerender) {
         // anything role-shaped here, so this cannot be used to self-promote.
         options: { data: { full_name, user_type, phone, organisation } },
       });
+      if (error) { busy(su, false); return setMsg(su, friendly(error)); }
+      // No email verification (no SMTP available on this domain). signUp() may
+      // auto-create a session — sign it out so the user completes a deliberate
+      // first login, as requested.
+      const { data: sess } = await sb.auth.getSession();
+      if (sess?.session) await sb.auth.signOut();
       busy(su, false);
-      if (error) return setMsg(su, friendly(error));
-      go(`#/verify/${encodeURIComponent(email)}`);
-    });
-  }
-
-  /* --- verify signup OTP --- */
-  const vf = document.querySelector('.js-verify');
-  if (vf) {
-    const email = vf.dataset.email;
-    vf.addEventListener('submit', async e => {
-      e.preventDefault();
-      const token = (new FormData(vf).get('token') || '').trim();
-      if (!/^\d{6}$/.test(token)) return setMsg(vf, 'Enter the 6-digit code from your email.');
-      setMsg(vf, ''); busy(vf, true, 'Verifying…');
-      const sb = await getSupabase();
-      const { error } = await sb.auth.verifyOtp({ email, token, type: 'signup' });
-      if (error) { busy(vf, false); return setMsg(vf, friendly(error)); }
-      // verifyOtp signs the user straight in; sign back out so they complete a
-      // deliberate login, as requested.
-      await sb.auth.signOut();
-      busy(vf, false);
-      go('#/login/verified');
-    });
-    vf.querySelector('.js-resend')?.addEventListener('click', async () => {
-      setMsg(vf, 'Sending a new code…', 'ok');
-      const sb = await getSupabase();
-      const { error } = await sb.auth.resend({ type: 'signup', email });
-      setMsg(vf, error ? friendly(error) : 'A new code is on its way.', error ? 'err' : 'ok');
+      go('#/login/created');
     });
   }
 
@@ -385,48 +307,6 @@ export function wireAuth(rerender) {
       sessionStorage.removeItem('ar.returnTo');
       location.hash = back;
       rerender?.();
-    });
-  }
-
-  /* --- forgot --- */
-  const ff = document.querySelector('.js-forgot');
-  if (ff) {
-    ff.addEventListener('submit', async e => {
-      e.preventDefault();
-      const email = ((new FormData(ff).get('email')) || '').trim().toLowerCase();
-      if (!email) return setMsg(ff, 'Enter your email address.');
-      setMsg(ff, ''); busy(ff, true, 'Sending…');
-      const sb = await getSupabase();
-      await sb.auth.resetPasswordForEmail(email);
-      busy(ff, false);
-      // Always advance, even on error — never reveal whether an email is registered.
-      go(`#/reset/${encodeURIComponent(email)}`);
-    });
-  }
-
-  /* --- reset with OTP --- */
-  // NB: `js-pwreset`, not `js-reset` — the latter is the "reset all progress" button.
-  const rf = document.querySelector('.js-pwreset');
-  if (rf) {
-    wirePasswordUx(rf);
-    rf.addEventListener('submit', async e => {
-      e.preventDefault();
-      const fd = new FormData(rf);
-      const token = (fd.get('token') || '').trim();
-      const password = fd.get('password') || '';
-      const confirm = fd.get('confirm') || '';
-      if (!/^\d{6}$/.test(token)) return setMsg(rf, 'Enter the 6-digit code from your email.');
-      if (!passwordOk(password)) return setMsg(rf, 'Password too weak — use 8+ characters mixing capitals, small letters, a number or a symbol.');
-      if (password !== confirm) return setMsg(rf, 'The two passwords do not match.');
-      setMsg(rf, ''); busy(rf, true, 'Updating…');
-      const sb = await getSupabase();
-      const { error: vErr } = await sb.auth.verifyOtp({ email: rf.dataset.email, token, type: 'recovery' });
-      if (vErr) { busy(rf, false); return setMsg(rf, friendly(vErr)); }
-      const { error: uErr } = await sb.auth.updateUser({ password });
-      if (uErr) { busy(rf, false); return setMsg(rf, friendly(uErr)); }
-      await sb.auth.signOut();
-      busy(rf, false);
-      go('#/login/reset');
     });
   }
 

@@ -65,7 +65,6 @@ export function renderCatalogue() {
       <h1>500 Economics Labs</h1>
       <p class="lead">A full, free curriculum of hands-on labs — from first Python steps to advanced econometrics, NLP, behavioral experiments, climate & development economics.</p>
     </div>
-    <button type="button" class="btn js-dl-gate" style="margin-bottom:14px">⬇️ Download the full 500-lab PDF catalogue</button>
     <div class="search-box">🔎 <input id="cat-q" type="search" placeholder="Search 500 labs — “regression”, “sentiment”, “Gini”…" value="${esc(catState.q)}" autocomplete="off"></div>
     <div class="fchip-row" data-group="track">${trackChips}</div>
     <div class="fchip-row" data-group="level">${levelChips}</div>
@@ -237,10 +236,6 @@ function renderTool(kind, color) {
 }
 
 /* ============================== TOOLS (logic) ============================== */
-// app.js supplies the download handler (it owns the Supabase session + profile).
-let _onDownloadRequest = null;
-export function setDownloadHandler(fn) { _onDownloadRequest = fn; }
-
 export function wireLabs() {
   // Catalogue filters
   const catList = document.getElementById('cat-list');
@@ -256,7 +251,6 @@ export function wireLabs() {
       renderCatalogueList();
       wirePager(catList);
     }));
-    document.querySelector('.js-dl-gate')?.addEventListener('click', () => _onDownloadRequest?.());
   }
 
   const host = document.getElementById('labtool');

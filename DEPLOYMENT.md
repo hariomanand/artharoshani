@@ -100,7 +100,20 @@ select email, role from public.profiles where role = 'admin';
 
 ---
 
-## Step 7 — Turn on email OTP (so real students receive codes)
+## Step 7 — Turn OFF email confirmation (no SMTP needed)
+
+> **Current setup (2026-07): the site sends NO emails.** The domain is a `*.pages.dev` subdomain, so SMTP senders like Brevo can't be domain-verified. Signup therefore works with email + password alone — no OTP, no verification mail. For that to work you must flip ONE switch:
+
+Supabase → **Authentication → Sign In / Providers → Email** → turn **OFF** "Confirm email" → Save.
+
+If you skip this, Supabase silently expects a confirmation that will never arrive, and every new account gets "This account is not activated yet" at login. There is no password-reset email either — reset a student's password manually in **Authentication → Users → ⋯ → Reset password** if they ask.
+
+The section below is kept ONLY for the future, if you move to a custom domain and want OTP verification back.
+
+<details>
+<summary>Later: email OTP setup (needs a domain you control)</summary>
+
+### Old Step 7 — Turn on email OTP (so real students receive codes)
 
 Sign-up verification and password reset both email a **6-digit code**. Supabase's built-in email sender is capped at a few messages per hour and is fine for **your own testing only** — real students will not receive codes until you connect a free SMTP provider. This is the one part only you can do (it needs your own account).
 
@@ -140,13 +153,14 @@ The app verifies OTP codes, so the templates must include the token. Supabase �
 
 Supabase → **Authentication → URL Configuration** → set **Site URL** to `https://artharoshani.pages.dev` (and add it under **Redirect URLs**).
 
+</details>
+
 ---
 
 ## How accounts & gating work
 
-- **Sign up** (`#/signup`): name, role (student / teacher / professional / other), email (required), phone (optional), school/organisation (optional), password + confirm with a live strength meter. On submit, a 6-digit code is emailed.
-- **Verify** (`#/verify`): enter the code → account confirmed → redirected to **Sign in** (as requested, sign-up does not auto-enter the app).
-- **Sign in** (`#/login`) and **Forgot password** (`#/forgot` → `#/reset`), both code-based.
+- **Sign up** (`#/signup`): name, role (student / teacher / professional / other), email (required), phone (optional), school/organisation (optional), password + confirm with a live strength meter. No verification email — after signup the user is sent to **Sign in** and logs in immediately.
+- **Sign in** (`#/login`): email + password. There is no self-service password reset (no email sending); reset passwords for users in Supabase → Authentication → Users.
 - **Locked** content: `#/labs`, every individual lab, and the 500-lab catalogue require a signed-in account. A signed-out visitor sees a "Sign in to open the labs" screen and is returned to where they were after logging in.
 - **Public** (still free, still indexable): the home/marketing pages, chapter notes, quizzes, practice bank and the India Blueprint.
 
@@ -159,10 +173,10 @@ The homepage review section is fed entirely by real, signed-in learners — ther
 - The database enforces this, not just the UI: a trigger forces `approved = false` on insert and rejects any non-admin trying to flip it, so nobody can self-publish. Editing an approved review sends it back to pending for a re-check.
 - Until a real review is approved, the homepage shows an honest invitation ("We don't publish made-up testimonials…") with a **Write a review** button instead of fake quotes.
 
-## The 500-lab catalogue & gated download
+## The 500-lab catalogue (downloads disabled)
 
 - The catalogue lists **10 labs per page** with a pager (500 labs → 50 pages), plus search and track/level filters.
-- The **Download PDF** button opens a short form (name, email, purpose). On submit the request is recorded to the `lab_downloads` table and the PDF downloads. Every request shows up in the admin **Downloads** tab.
+- **Downloads are disabled site-wide.** The PDF button was removed and the catalogue PDF itself is no longer deployed (`*.pdf` is in `.assetsignore` and the file was deleted from the repo — regenerate locally anytime with `python tools/build-pdf.py`). The admin **Downloads** tab remains to view any historical records.
 
 ## Using the admin panel
 
@@ -212,8 +226,7 @@ Then `git push` — Cloudflare redeploys automatically.
 
 | Problem | Fix |
 |---|---|
-| Students don't get the code | Custom SMTP not set up — do **Step 7**. The built-in sender is rate-limited to a few/hour. |
-| They get a link, not a 6-digit code | Edit the email templates to use `{{ .Token }}` (Step 7c). |
+| New accounts get "not activated yet" at login | "Confirm email" is still ON — turn it OFF (Step 7). |
 | "Invalid credentials" for a real admin | Confirm the promote SQL ran (Step 6) — `select email, role from profiles where role='admin'`. |
 | Admin login loops back to sign-in | That account isn't an admin — it's rejected by design. Promote it (Step 6). |
 | Uploads fail | Confirm the schema ran fully (the `media` bucket + storage policies must exist). |
