@@ -1,0 +1,176 @@
+/* ============================================================
+   ArthaRoshni — accounts & gating
+   Sign in / sign up / verify / reset, the lab lock screen, the
+   account page, the catalogue pager and the download gate.
+   Loaded after site.css.
+   ============================================================ */
+
+.auth-page { max-width: 560px; margin: 0 auto; padding: 40px 16px 72px; }
+.auth-card {
+  background: #fff; border: 1px solid var(--slate-200); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 32px 28px;
+}
+.auth-card__head { text-align: center; margin-bottom: 24px; }
+.auth-card__mark {
+  width: 46px; height: 46px; border-radius: 12px; margin: 0 auto 14px;
+  background: var(--navy-900); color: var(--amber-400);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 800;
+}
+.auth-card__head h1 { font-size: 25px; font-weight: 800; color: var(--navy-900); margin-bottom: 6px; }
+.auth-card__head p { color: var(--slate-600); font-size: 14.5px; line-height: 1.55; }
+.auth-card__foot {
+  margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--slate-200);
+  text-align: center; font-size: 14px; color: var(--slate-600);
+}
+.auth-card__foot a { color: var(--navy-700); font-weight: 700; }
+.auth-card__foot a:hover { color: var(--amber-600); }
+
+.auth-form { display: flex; flex-direction: column; gap: 15px; }
+.auth-f {
+  display: flex; flex-direction: column; gap: 6px;
+  font-size: 13.5px; font-weight: 600; color: var(--navy-900);
+}
+.auth-f .req { color: var(--danger); font-weight: 700; }
+.auth-f .opt { color: var(--slate-400); font-weight: 500; font-size: 12px; }
+.auth-f small { font-weight: 400; color: var(--slate-500); font-size: 12.5px; line-height: 1.5; }
+.auth-f small b { color: var(--navy-700); font-weight: 700; }
+.auth-f input, .auth-f select {
+  width: 100%; padding: 11px 13px; font: inherit; font-size: 15px; font-weight: 400;
+  color: var(--navy-900); background: #fff;
+  border: 1px solid var(--slate-300); border-radius: 10px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.auth-f input:focus, .auth-f select:focus {
+  outline: none; border-color: var(--navy-500);
+  box-shadow: 0 0 0 3px rgba(58, 101, 164, .15);
+}
+.auth-f input::placeholder { color: var(--slate-400); }
+.auth-otp { letter-spacing: .5em; font-size: 21px !important; text-align: center; font-weight: 700 !important; }
+
+.auth-pw { position: relative; display: block; }
+.auth-pw input { padding-right: 58px; }
+.auth-eye {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: 0; cursor: pointer; padding: 6px 8px;
+  font-size: 12px; font-weight: 700; color: var(--slate-500);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.auth-eye:hover { color: var(--navy-700); }
+
+.pw-meter { display: block; height: 5px; border-radius: 3px; background: var(--slate-200); overflow: hidden; }
+.pw-meter__bar { display: block; height: 100%; width: 0; border-radius: 3px; transition: width .2s, background .2s; }
+.pw-meter__bar[data-level="1"], .pw-meter__bar[data-level="2"] { background: var(--danger); }
+.pw-meter__bar[data-level="3"] { background: var(--amber-500); }
+.pw-meter__bar[data-level="4"] { background: #65a30d; }
+.pw-meter__bar[data-level="5"] { background: var(--ok); }
+
+.auth-msg { font-size: 13.5px; line-height: 1.5; padding: 10px 13px; border-radius: 9px; font-weight: 500; }
+.auth-msg--err { background: var(--danger-soft); color: #991b1b; border: 1px solid #f5c2c2; }
+.auth-msg--ok { background: var(--ok-soft); color: #14532d; border: 1px solid #a7d8b8; }
+.auth-submit { width: 100%; justify-content: center; margin-top: 4px; }
+.auth-submit:disabled { opacity: .6; cursor: progress; }
+.auth-note { font-size: 12px; color: var(--slate-500); text-align: center; line-height: 1.5; }
+.auth-link {
+  background: none; border: 0; cursor: pointer; font: inherit; font-size: 13.5px; font-weight: 600;
+  color: var(--navy-700); text-align: center; padding: 2px;
+}
+.auth-link:hover { color: var(--amber-600); text-decoration: underline; }
+
+/* ---------------------------------------------- lock screen */
+.auth-card--lock { text-align: center; }
+.lock-badge {
+  width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 16px;
+  background: var(--amber-400); display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.auth-card--lock h1 { font-size: 24px; font-weight: 800; color: var(--navy-900); margin-bottom: 10px; }
+.lock-lead { color: var(--slate-600); font-size: 15px; line-height: 1.6; margin-bottom: 20px; }
+.lock-list { list-style: none; text-align: left; margin: 0 auto 24px; display: inline-flex; flex-direction: column; gap: 9px; }
+.lock-list li { position: relative; padding-left: 26px; font-size: 14.5px; color: var(--navy-800); }
+.lock-list li::before {
+  content: '\2713'; position: absolute; left: 0; top: -1px;
+  color: var(--ok); font-weight: 800; font-size: 15px;
+}
+.lock-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* .c-btn--outline is white-on-transparent for dark sections; on these light
+   cards it would be invisible, so restyle it in this context. */
+.auth-card .c-btn--outline, .acct-card .c-btn--outline {
+  background: #fff; border: 1px solid var(--slate-300); color: var(--navy-800) !important; backdrop-filter: none;
+}
+.auth-card .c-btn--outline:hover, .acct-card .c-btn--outline:hover {
+  background: var(--navy-50); border-color: var(--navy-300);
+}
+
+/* ---------------------------------------------- account page */
+.acct-card {
+  max-width: 620px; margin: 0 auto; background: #fff;
+  border: 1px solid var(--slate-200); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 26px;
+}
+.acct-card h2 { font-size: 19px; font-weight: 800; color: var(--navy-900); margin-bottom: 16px; }
+.acct-row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+  padding: 11px 0; border-bottom: 1px solid var(--slate-100); font-size: 14.5px;
+}
+.acct-row span { color: var(--slate-500); flex-shrink: 0; }
+.acct-row b { color: var(--navy-900); text-align: right; word-break: break-word; }
+.acct-actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+
+/* ---------------------------------------------- catalogue pager */
+.cat-pager {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 30px 0 8px; flex-wrap: wrap;
+}
+.cat-pager button {
+  min-width: 38px; height: 38px; padding: 0 11px; cursor: pointer;
+  background: #fff; border: 1px solid var(--slate-300); border-radius: 9px;
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--navy-800);
+  transition: background .15s, border-color .15s;
+}
+.cat-pager button:hover:not(:disabled):not(.is-current) { background: var(--navy-50); border-color: var(--navy-300); }
+.cat-pager button.is-current { background: var(--navy-900); border-color: var(--navy-900); color: #fff; cursor: default; }
+.cat-pager button:disabled { opacity: .4; cursor: not-allowed; }
+.cat-pager .cat-pager__gap { border: 0; background: none; cursor: default; min-width: 18px; color: var(--slate-400); }
+.cat-count { text-align: center; font-size: 13px; color: var(--slate-500); margin-top: 6px; }
+
+/* ---------------------------------------------- download gate */
+.dl-backdrop {
+  position: fixed; inset: 0; z-index: 120; background: rgba(6, 15, 36, .62);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  backdrop-filter: blur(3px); animation: dl-fade .18s ease-out;
+}
+@keyframes dl-fade { from { opacity: 0 } to { opacity: 1 } }
+.dl-modal {
+  background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; padding: 26px;
+}
+.dl-modal h2 { font-size: 20px; font-weight: 800; color: var(--navy-900); margin-bottom: 6px; }
+.dl-modal .dl-sub { font-size: 14px; color: var(--slate-600); line-height: 1.55; margin-bottom: 18px; }
+.dl-modal textarea {
+  width: 100%; padding: 11px 13px; font: inherit; font-size: 15px; resize: vertical;
+  border: 1px solid var(--slate-300); border-radius: 10px; color: var(--navy-900);
+}
+.dl-modal textarea:focus { outline: none; border-color: var(--navy-500); box-shadow: 0 0 0 3px rgba(58, 101, 164, .15); }
+.dl-actions { display: flex; gap: 10px; margin-top: 6px; }
+.dl-actions .c-btn { flex: 1; justify-content: center; }
+.dl-cancel {
+  background: #fff; border: 1px solid var(--slate-300); border-radius: 10px; cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--navy-800); padding: 12px 18px;
+}
+.dl-cancel:hover { background: var(--navy-50); }
+
+/* ---------------------------------------------- mobile */
+@media (max-width: 560px) {
+  .auth-page { padding: 22px 12px 56px; }
+  .auth-card { padding: 24px 18px; border-radius: 14px; }
+  .auth-card__head h1 { font-size: 22px; }
+  .lock-actions { flex-direction: column; }
+  .lock-actions .c-btn { width: 100%; justify-content: center; }
+  .acct-row { flex-direction: column; gap: 3px; }
+  .acct-row b { text-align: left; }
+  .acct-actions { flex-direction: column; }
+  .acct-actions .c-btn { width: 100%; justify-content: center; }
+  .dl-modal { padding: 20px 16px; }
+  .dl-actions { flex-direction: column-reverse; }
+}

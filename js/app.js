@@ -1,7 +1,8 @@
 import { CLASSES, byClass, findChapter, allReadyChapters, stats } from '../data/index.js';
 import { renderBlocks } from './blocks.js';
 import { Store } from './store.js';
-import { renderLabsHub, renderLab, wireLabs, renderCatalogue, renderCatalogueLab } from './labs.js';
+import { renderLabsHub, renderLab, wireLabs, renderCatalogue, renderCatalogueLab, setDownloadHandler } from './labs.js';
+import { getSupabase } from './supabase.js';
 import { labById, LABS } from '../data/labs.js';
 import { CATALOGUE, TRACK_META } from '../data/catalogue.js';
 import { syncFromCloud, extraMedia } from './content.js';
@@ -12,6 +13,10 @@ import { renderBlueprint, wireBlueprint } from './blueprint.js';
 import { BP_CHAPTERS } from '../data/blueprint.js';
 import { QBANK, QBANK_TOTAL, qbFind } from '../data/qbank.js';
 import { buildOptions } from './mcq.js';
+import {
+  Auth, wireAuth, viewLogin, viewSignup as viewAuthSignup, viewVerify,
+  viewForgot, viewReset, viewLocked,
+} from './auth.js';
 
 const app = document.getElementById('app');
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -24,6 +29,17 @@ function parseHash() {
   return { name: parts[0] || 'home', params: parts.slice(1) };
 }
 
+// Every lab route is gated. Chapter notes, quizzes, the Blueprint and all
+// marketing pages stay public so they remain indexable and work offline.
+function gated(view, what) {
+  return params => {
+    if (Auth.isAuthed()) return view(params);
+    const back = '#/' + [parseHash().name].concat(params).join('/');
+    try { sessionStorage.setItem('ar.returnTo', back); } catch { /* private mode */ }
+    return viewLocked(back, what);
+  };
+}
+
 const routes = {
   home: viewHome,
   class: viewClass,
@@ -34,10 +50,10 @@ const routes = {
   bookmarks: viewBookmarks,
   search: viewSearch,
   about: viewAbout,
-  labs: viewLabs,
-  lab: viewLab,
-  catalogue: p => Store.profile() ? viewCatalogue(p) : viewSignup('#/catalogue'),
-  'lab-item': p => Store.profile() ? viewCatalogueLab(p) : viewSignup('#/' + ['lab-item'].concat(p).join('/')),
+  labs: gated(viewLabs, 'the labs'),
+  lab: gated(viewLab, 'this lab'),
+  catalogue: gated(viewCatalogue, 'the 500-lab catalogue'),
+  'lab-item': gated(viewCatalogueLab, 'this lab'),
   courses: viewCourses,
   students: viewStudents,
   certifications: viewCertifications,
@@ -45,6 +61,13 @@ const routes = {
   blogs: viewBlogs,
   blog: viewBlogPost,
   blueprint: viewBlueprint,
+  // auth
+  login: viewLogin,
+  signup: p => viewAuthSignup(p[0] ? decodeURIComponent(p[0]) : '#/labs'),
+  verify: viewVerify,
+  forgot: viewForgot,
+  reset: viewReset,
+  account: viewAccount,
 };
 
 function viewBlueprint([chapterId]) { return renderBlueprint(chapterId); }
@@ -192,8 +215,11 @@ function siteHeader(active) {
   return `
   <div class="announce"><div class="announce__in">
     <div class="announce__msg"><span class="announce__new">New</span>
-      <span>India's Economic Blueprint — an interactive 8-chapter journey from 1947 to a $5-trillion future.</span></div>
-    <a class="announce__cta" href="#/blueprint">Explore the Blueprint →</a>
+      <span><span class="announce__track">
+        <span>India's Economic Blueprint — an interactive 8-chapter journey from 1947 to a $5-trillion future.</span>
+        <span aria-hidden="true">India's Economic Blueprint — an interactive 8-chapter journey from 1947 to a $5-trillion future.</span>
+      </span></span></div>
+    <a class="announce__cta" href="#/blueprint">Explore the Blueprint <span class="announce__arrow">→</span></a>
   </div></div>
   <header class="site-nav js-sitenav"><div class="site-nav__in">
     <a class="brand" href="#/">${brandMark}</a>
@@ -203,8 +229,10 @@ function siteHeader(active) {
         ${icon('search', 16)}<input type="search" placeholder="Search" aria-label="Search topics">
       </form>
       <a class="nav-icon js-searchicon" href="#/search" aria-label="Search">${icon('search', 18)}</a>
-      <a class="nav-login" href="admin.html">${icon('user', 16)}<span>Log In</span></a>
-      <a class="c-btn c-btn--startfree" href="#/courses">Start Free</a>
+      ${Auth.isAuthed()
+        ? `<a class="nav-login" href="#/account">${icon('user', 16)}<span>${esc((Auth.displayName() || '').split(' ')[0] || 'Account')}</span></a>`
+        : `<a class="nav-login" href="#/login">${icon('user', 16)}<span>Log In</span></a>`}
+      <a class="c-btn c-btn--startfree" href="${Auth.isAuthed() ? '#/labs' : '#/signup'}">${Auth.isAuthed() ? 'Open Labs' : 'Start Free'}</a>
       <button class="nav-toggle js-navtoggle" aria-label="Menu">${icon('menu', 22)}</button>
     </div>
   </div>
@@ -215,8 +243,11 @@ function siteHeader(active) {
     ${mobileGroups}
     <a class="mm-flat" href="#/blueprint">${icon('compass', 17)} India's Economic Blueprint</a>
     <div class="mm-actions">
-      <a class="c-btn c-btn--startfree" href="admin.html">${icon('user', 15)} Log In</a>
-      <a class="c-btn c-btn--primary" href="#/courses">Start Free</a>
+      ${Auth.isAuthed()
+        ? `<a class="c-btn c-btn--startfree" href="#/account">${icon('user', 15)} ${esc(Auth.displayName())}</a>
+           <a class="c-btn c-btn--primary" href="#/labs">Open Labs</a>`
+        : `<a class="c-btn c-btn--startfree" href="#/login">${icon('user', 15)} Log In</a>
+           <a class="c-btn c-btn--primary" href="#/signup">Start Free</a>`}
     </div>
   </div></header>`;
 }
@@ -950,25 +981,26 @@ function viewQuiz([classId, chapterId]) {
   return topbar('Chapter Quiz', ch.title, { back: `#/read/${cls.id}/${ch.id}` }) + `<main class="page">${body}</main>`;
 }
 
-/* -------------------------------------------------- SIGNUP gate (catalogue) */
-function viewSignup(returnTo) {
-  return topbar('Create your free account', 'Unlock the 500-Lab Catalogue', { back: '#/' }) + `
+/* -------------------------------------------------- ACCOUNT */
+function viewAccount() {
+  if (!Auth.isAuthed()) { try { sessionStorage.setItem('ar.returnTo', '#/account'); } catch {} return viewLocked('#/account', 'your account'); }
+  const p = Auth.profile() || {};
+  const u = Auth.user() || {};
+  const TYPE = { student: 'Student', teacher: 'Teacher', professional: 'Working professional', other: 'Other' };
+  const row = (k, v) => `<div class="acct-row"><span>${esc(k)}</span><b>${esc(v || '—')}</b></div>`;
+  return topbar('Your account', Auth.displayName(), { back: '#/' }) + `
   <main class="page">
-    <div class="signup-card">
-      <div class="signup-card__head">
-        <h2>Explore all 500 labs — free.</h2>
-        <p>One quick signup unlocks the full technical-lab catalogue. No password, no fees, no spam — ArthaRoshni just likes knowing who's learning with us.</p>
+    <div class="acct-card">
+      <h2>Profile</h2>
+      ${row('Name', p.full_name)}
+      ${row('Role', TYPE[p.user_type] || '—')}
+      ${row('Email', p.email || u.email)}
+      ${row('Phone', p.phone)}
+      ${row('School / organisation', p.organisation)}
+      <div class="acct-actions">
+        <a class="c-btn c-btn--primary" href="#/labs">Open the labs →</a>
+        <button class="c-btn c-btn--outline js-signout" type="button">Sign out</button>
       </div>
-      <form class="signup-form js-signup" data-return="${esc(returnTo)}">
-        <label>Full name<input name="name" type="text" required placeholder="e.g. Roshani Kumari" autocomplete="name"></label>
-        <label>Email<input name="email" type="email" required placeholder="you@example.com" autocomplete="email"></label>
-        <label>Class<select name="klass">
-          <option value="">Select your class (optional)</option>
-          <option>Class 10</option><option>Class 11</option><option>Class 12</option><option>Teacher / Other</option>
-        </select></label>
-        <button class="btn" type="submit">Create free account →</button>
-        <p class="signup-note">Free forever · your details stay with ArthaRoshni only.</p>
-      </form>
     </div>
   </main>`;
 }
@@ -1309,26 +1341,8 @@ function wire() {
     b.classList.toggle('is-active', on);
   }));
 
-  // Catalogue signup gate
-  const signupForm = document.querySelector('.js-signup');
-  if (signupForm) signupForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    const fd = new FormData(signupForm);
-    const p = {
-      name: String(fd.get('name') || '').trim(),
-      email: String(fd.get('email') || '').trim(),
-      klass: String(fd.get('klass') || ''),
-    };
-    if (!p.name || !p.email) return;
-    Store.setProfile(p);
-    try {
-      const { getSupabase } = await import('./supabase.js');
-      const sb = await getSupabase();
-      if (sb) await sb.from('signups').insert({ name: p.name, email: p.email, klass: p.klass, source: 'catalogue' });
-    } catch { /* cloud optional — signup still works offline */ }
-    const dest = signupForm.dataset.return || '#/catalogue';
-    if (location.hash === dest) render(); else location.hash = dest;
-  });
+  // Account forms (sign up / in / verify / reset / sign out)
+  wireAuth(render);
 
   // Quiz option click
   document.querySelectorAll('.quiz-opt:not([disabled])').forEach(o => o.addEventListener('click', () => {
@@ -1422,8 +1436,80 @@ function wire() {
   }));
 }
 
+/* -------------------------------------------------- catalogue download gate */
+const CATALOGUE_PDF = 'ArthaRoshni-500-Labs-Catalogue.pdf';
+
+function openDownloadGate() {
+  // Labs are gated, so a visitor reaching this is already signed in — but guard anyway.
+  if (!Auth.isAuthed()) { try { sessionStorage.setItem('ar.returnTo', '#/catalogue'); } catch {} location.hash = '#/login'; return; }
+  const p = Auth.profile() || {};
+  const back = document.createElement('div');
+  back.className = 'dl-backdrop';
+  back.innerHTML = `
+    <div class="dl-modal" role="dialog" aria-modal="true" aria-labelledby="dl-h">
+      <h2 id="dl-h">Download the 500-lab catalogue</h2>
+      <p class="dl-sub">Confirm your details and tell us how you'll use it. We record each download to keep the catalogue free and improve it.</p>
+      <form class="auth-form js-dlform" novalidate>
+        <label class="auth-f">Name <span class="req">*</span>
+          <input name="name" type="text" required value="${esc(p.full_name || '')}" placeholder="Your name">
+        </label>
+        <label class="auth-f">Email <span class="req">*</span>
+          <input name="email" type="email" required value="${esc(p.email || Auth.user()?.email || '')}" placeholder="you@example.com">
+        </label>
+        <label class="auth-f">How will you use the catalogue? <span class="req">*</span>
+          <textarea name="purpose" rows="3" required placeholder="e.g. Planning a Class 12 economics project on inflation."></textarea>
+        </label>
+        <div class="auth-msg js-msg" hidden></div>
+        <div class="dl-actions">
+          <button type="button" class="dl-cancel js-dl-cancel">Cancel</button>
+          <button type="submit" class="c-btn c-btn--primary js-dl-submit">Download PDF ⬇️</button>
+        </div>
+      </form>
+    </div>`;
+  document.body.appendChild(back);
+  document.body.style.overflow = 'hidden';
+
+  const close = () => { back.remove(); document.body.style.overflow = ''; };
+  back.addEventListener('click', e => { if (e.target === back) close(); });
+  back.querySelector('.js-dl-cancel').addEventListener('click', close);
+  document.addEventListener('keydown', function onEsc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); } });
+
+  back.querySelector('.js-dlform').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const name = (fd.get('name') || '').trim();
+    const email = (fd.get('email') || '').trim();
+    const purpose = (fd.get('purpose') || '').trim();
+    const msg = back.querySelector('.js-msg');
+    const showErr = t => { msg.hidden = false; msg.className = 'auth-msg js-msg auth-msg--err'; msg.textContent = t; };
+    if (!name || !email || purpose.length < 5) return showErr('Please fill in your name, email and a brief purpose.');
+
+    const btn = back.querySelector('.js-dl-submit');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const sb = await getSupabase();
+      if (sb) {
+        await sb.from('lab_downloads').insert({
+          user_id: Auth.user()?.id, name, email, purpose, organisation: p.organisation || null,
+        });
+      }
+    } catch { /* recording is best-effort; never block the learner's download */ }
+
+    // Trigger the download, then close.
+    const a = document.createElement('a');
+    a.href = CATALOGUE_PDF; a.download = CATALOGUE_PDF; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    close();
+  });
+}
+setDownloadHandler(openDownloadGate);
+
 /* -------------------------------------------------- boot */
-render();
-// After first paint, pull any admin edits / uploaded media from the cloud
-// (no-op when offline or not configured), then repaint.
-syncFromCloud(() => render());
+// Resolve the session before the first paint, otherwise a signed-in user would
+// see the locked screen flash on a lab route before the session resolves.
+Auth.init(render).then(() => {
+  render();
+  // After first paint, pull any admin edits / uploaded media from the cloud
+  // (no-op when offline or not configured), then repaint.
+  syncFromCloud(() => render());
+});

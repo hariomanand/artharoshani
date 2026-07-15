@@ -3,11 +3,20 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# The admin panel must never be indexed, cached by a shared proxy, framed,
+# or leak its URL via Referer.
+/admin.html
+  Cache-Control: no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
 
 # Never cache the service worker or app entry (so updates ship instantly)
 /sw.js
   Cache-Control: no-cache
 /index.html
-  Cache-Control: no-cache
-/admin.html
   Cache-Control: no-cache

@@ -33,29 +33,41 @@ async function boot() {
 }
 
 /* ------------------------------------------------ setup notice */
+// Deliberately generic: this page is public, so it must not disclose the
+// backend, the tech stack, or that anything is "not configured".
 function renderSetupNotice() {
   root.innerHTML = `<div class="adm-login"><div class="adm-card">
-    <div class="adm-top" style="border:none;padding:0 0 14px"><div class="logo">⚙️</div><h1>Admin setup</h1></div>
-    <div class="notice"><b>Cloud not connected yet</b>
-      Open <span class="code-inline">js/config.js</span> and paste your Supabase URL and anon key. See <span class="code-inline">DEPLOYMENT.md</span> for the 5-minute setup.</div>
-    <p class="muted" style="font-size:13px">Until then the public app still works fully offline — only the admin panel and cloud sync need Supabase.</p>
+    <div class="adm-top" style="border:none;padding:0 0 16px"><div class="logo">🔒</div><h1>Sign in</h1></div>
+    <div class="notice">This area is temporarily unavailable. Please try again later.</div>
   </div></div>`;
 }
 
 /* ------------------------------------------------ login */
 function renderLogin() {
+  // No product name, no backend hints, no account-creation instructions.
   root.innerHTML = `<div class="adm-login"><div class="adm-card">
-    <div class="adm-top" style="border:none;padding:0 0 16px"><div class="logo">₹</div><h1>ArthaRoshni Admin</h1></div>
-    <div class="field"><label>Email</label><input id="em" type="email" placeholder="you@example.com"></div>
-    <div class="field"><label>Password</label><input id="pw" type="password" placeholder="••••••••"></div>
-    <button class="btn js-login">🔑 Sign in</button>
-    <p class="muted" style="font-size:12px;margin-top:14px;text-align:center">Admin accounts are created in the Supabase dashboard (Authentication → Users), then given the <span class="code-inline">admin</span> role.</p>
+    <div class="adm-top" style="border:none;padding:0 0 16px"><div class="logo">🔒</div><h1>Sign in</h1></div>
+    <form class="adm-form js-loginform">
+      <div class="field"><label>Email</label><input id="em" type="email" autocomplete="username" required></div>
+      <div class="field"><label>Password</label><input id="pw" type="password" autocomplete="current-password" required></div>
+      <button class="btn js-login" type="submit">Sign in</button>
+      <p class="adm-err js-err" hidden></p>
+    </form>
   </div></div>`;
-  root.querySelector('.js-login').addEventListener('click', async () => {
+  const form = root.querySelector('.js-loginform');
+  const errBox = root.querySelector('.js-err');
+  const btn = root.querySelector('.js-login');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    errBox.hidden = true;
     const email = root.querySelector('#em').value.trim();
     const password = root.querySelector('#pw').value;
+    if (!email || !password) { errBox.hidden = false; errBox.textContent = 'Enter your email and password.'; return; }
+    btn.disabled = true; btn.textContent = 'Signing in…';
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) return toast(error.message, 'err');
+    btn.disabled = false; btn.textContent = 'Sign in';
+    // Generic message — never reveal whether the email exists or the role.
+    if (error || !data?.user) { errBox.hidden = false; errBox.textContent = 'Invalid credentials.'; return; }
     user = data.user; renderShell();
   });
 }
@@ -66,14 +78,17 @@ async function renderShell() {
   const { data: prof } = await sb.from('profiles').select('role,full_name').eq('id', user.id).single();
   const role = prof?.role || 'user';
   if (role !== 'admin') {
-    root.innerHTML = `<div class="adm-login"><div class="adm-card">
-      <div class="notice"><b>Not an admin</b>This account (${esc(user.email)}) doesn’t have the admin role. In Supabase → Table editor → profiles, set <span class="code-inline">role = 'admin'</span> for this user.</div>
-      <button class="btn btn--ghost js-out">Sign out</button></div></div>`;
-    root.querySelector('.js-out').addEventListener('click', signOut);
+    // A non-admin (e.g. a regular student account) must not learn this is an
+    // admin panel or how roles work. Sign them out and show the generic login.
+    await sb.auth.signOut();
+    user = null;
+    renderLogin();
+    root.querySelector('.js-err').hidden = false;
+    root.querySelector('.js-err').textContent = 'Invalid credentials.';
     return;
   }
 
-  const tabs = [['dash', '📊 Dashboard'], ['content', '📝 Notes'], ['media', '📎 Media/PPT'], ['labs', '🔬 Labs'], ['users', '👥 Users'], ['signups', '✉️ Signups'], ['ann', '📢 Announce']];
+  const tabs = [['dash', '📊 Dashboard'], ['content', '📝 Notes'], ['media', '📎 Media/PPT'], ['labs', '🔬 Labs'], ['users', '👥 Users'], ['downloads', '⬇️ Downloads'], ['signups', '✉️ Signups'], ['ann', '📢 Announce']];
   root.innerHTML = `<div class="adm-shell">
     <div class="adm-top"><div class="logo">₹</div><h1>ArthaRoshni Admin</h1>
       <div class="who">${esc(prof?.full_name || user.email)} <button class="js-out">Sign out</button></div></div>
@@ -95,6 +110,7 @@ async function renderPane() {
   if (tab === 'media') return renderMediaTab(pane);
   if (tab === 'labs') return renderLabsTab(pane);
   if (tab === 'users') return renderUsers(pane);
+  if (tab === 'downloads') return renderDownloads(pane);
   if (tab === 'signups') return renderSignups(pane);
   if (tab === 'ann') return renderAnn(pane);
 }
@@ -107,8 +123,8 @@ async function renderDash(pane) {
     <div class="adm-card"><h2>Quick actions</h2>
     <div class="grid2"><button class="btn js-go" data-t="content">📝 Edit notes</button>
     <button class="btn btn--accent js-go" data-t="media">📎 Upload PPT / infographic</button></div></div>`;
-  const [c, m, l, u] = await Promise.all([count('content'), count('media'), count('labs'), count('profiles')]);
-  pane.querySelector('#stats').innerHTML = [['Content edits', c], ['Media files', m], ['Labs', l], ['Users', u]]
+  const [c, m, l, u, d] = await Promise.all([count('content'), count('media'), count('labs'), count('profiles'), count('lab_downloads')]);
+  pane.querySelector('#stats').innerHTML = [['Registered users', u], ['Catalogue downloads', d], ['Content edits', c], ['Media files', m], ['Labs', l]]
     .map(([k, v]) => `<div class="dash-stat"><b>${v}</b><span>${k}</span></div>`).join('');
   pane.querySelectorAll('.js-go').forEach(b => b.addEventListener('click', () => { tab = b.dataset.t; renderShell(); }));
 }
@@ -224,20 +240,128 @@ async function renderSignups(pane) {
   </div>`).join('') || '<p class="muted">No signups yet.</p>';
 }
 
+/* CSV export helper — quotes every field, downloads client-side. */
+function downloadCsv(filename, headers, rows) {
+  const q = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+  const csv = [headers.map(q).join(','), ...rows.map(r => r.map(q).join(','))].join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+  a.remove(); URL.revokeObjectURL(url);
+}
+
+const TYPE_LABEL = { student: 'Student', teacher: 'Teacher', professional: 'Professional', other: 'Other' };
+
 async function renderUsers(pane) {
-  pane.innerHTML = `<div class="adm-card"><h2>User management</h2><p class="sub">Promote or demote users. New sign-ups appear here automatically.</p><div id="list">Loading…</div></div>`;
-  const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+  pane.innerHTML = `<div class="adm-card">
+    <div class="adm-card__head">
+      <div><h2>Registered users</h2><p class="sub">Everyone who created an account. Details are read-only; you can change roles and export.</p></div>
+    </div>
+    <div class="adm-toolbar">
+      <input id="usearch" class="adm-search" type="search" placeholder="Search name, email, phone, organisation…">
+      <select id="ufilter" class="adm-search adm-search--sel">
+        <option value="">All roles</option>
+        <option value="student">Students</option>
+        <option value="teacher">Teachers</option>
+        <option value="professional">Professionals</option>
+        <option value="other">Other</option>
+        <option value="admin">Admins</option>
+      </select>
+      <button class="chip js-export">⬇️ Export CSV</button>
+    </div>
+    <div id="ustats" class="adm-substats"></div>
+    <div id="list">Loading…</div></div>`;
+
+  const { data, error } = await sb.from('profiles')
+    .select('id,full_name,email,role,user_type,phone,organisation,created_at')
+    .order('created_at', { ascending: false });
   const box = pane.querySelector('#list');
   if (error) { box.innerHTML = `<p class="muted">${esc(error.message)}</p>`; return; }
-  box.innerHTML = (data || []).map(p => `<div class="list-row">
-    <div class="main"><b>${esc(p.full_name || p.email || p.id.slice(0, 8))}</b><span>${esc(p.email || '')}</span></div>
-    <span class="role ${p.role === 'admin' ? 'admin' : ''}">${esc(p.role || 'user')}</span>
-    <button class="chip js-role" data-id="${p.id}" data-role="${p.role === 'admin' ? 'user' : 'admin'}">${p.role === 'admin' ? 'Make user' : 'Make admin'}</button>
-  </div>`).join('') || '<p class="muted">No users yet.</p>';
-  box.querySelectorAll('.js-role').forEach(b => b.addEventListener('click', async () => {
-    const { error } = await sb.from('profiles').update({ role: b.dataset.role }).eq('id', b.dataset.id);
-    error ? toast(error.message, 'err') : (toast('Role updated ✓', 'ok'), renderUsers(pane));
-  }));
+  const users = data || [];
+
+  const stats = pane.querySelector('#ustats');
+  const by = t => users.filter(u => u.user_type === t).length;
+  stats.innerHTML = `<span class="pill">${users.length} total</span>
+    <span class="pill">${by('student')} students</span>
+    <span class="pill">${by('teacher')} teachers</span>
+    <span class="pill">${by('professional')} professionals</span>
+    <span class="pill">${users.filter(u => u.role === 'admin').length} admins</span>`;
+
+  const draw = () => {
+    const q = (pane.querySelector('#usearch').value || '').trim().toLowerCase();
+    const f = pane.querySelector('#ufilter').value;
+    const rows = users.filter(u => {
+      if (f === 'admin' ? u.role !== 'admin' : (f && u.user_type !== f)) return false;
+      if (!q) return true;
+      return [u.full_name, u.email, u.phone, u.organisation].some(v => (v || '').toLowerCase().includes(q));
+    });
+    box.innerHTML = rows.length ? rows.map(p => `<div class="user-row">
+      <div class="user-row__main">
+        <b>${esc(p.full_name || '—')}</b>
+        <span class="role ${p.role === 'admin' ? 'admin' : ''}">${p.role === 'admin' ? 'admin' : esc(TYPE_LABEL[p.user_type] || 'user')}</span>
+      </div>
+      <div class="user-row__grid">
+        <span>✉️ ${esc(p.email || '—')}</span>
+        <span>📞 ${esc(p.phone || '—')}</span>
+        <span>🏫 ${esc(p.organisation || '—')}</span>
+        <span>🗓️ ${esc((p.created_at || '').slice(0, 10))}</span>
+      </div>
+      <div class="user-row__act">
+        <button class="chip js-role" data-id="${p.id}" data-role="${p.role === 'admin' ? 'user' : 'admin'}">${p.role === 'admin' ? 'Revoke admin' : 'Make admin'}</button>
+      </div>
+    </div>`).join('') : '<p class="muted">No users match.</p>';
+    box.querySelectorAll('.js-role').forEach(b => b.addEventListener('click', async () => {
+      if (!confirm(b.dataset.role === 'admin' ? 'Grant admin access to this user?' : 'Revoke admin access from this user?')) return;
+      const { error } = await sb.from('profiles').update({ role: b.dataset.role }).eq('id', b.dataset.id);
+      if (error) return toast(error.message, 'err');
+      const u = users.find(x => x.id === b.dataset.id); if (u) u.role = b.dataset.role;
+      toast('Role updated ✓', 'ok'); draw();
+    }));
+  };
+  draw();
+  pane.querySelector('#usearch').addEventListener('input', draw);
+  pane.querySelector('#ufilter').addEventListener('change', draw);
+  pane.querySelector('.js-export').addEventListener('click', () => {
+    downloadCsv('artharoshni-users.csv',
+      ['Name', 'Role', 'Type', 'Email', 'Phone', 'Organisation', 'Joined'],
+      users.map(u => [u.full_name, u.role, TYPE_LABEL[u.user_type] || '', u.email, u.phone, u.organisation, (u.created_at || '').slice(0, 10)]));
+    toast('Exported CSV ✓', 'ok');
+  });
+}
+
+async function renderDownloads(pane) {
+  pane.innerHTML = `<div class="adm-card">
+    <div class="adm-card__head"><div><h2>Catalogue download requests</h2><p class="sub">Everyone who downloaded the 500-lab PDF, with their stated purpose.</p></div></div>
+    <div class="adm-toolbar">
+      <input id="dsearch" class="adm-search" type="search" placeholder="Search name, email, purpose…">
+      <button class="chip js-export">⬇️ Export CSV</button>
+    </div>
+    <div id="list">Loading…</div></div>`;
+  const { data, error } = await sb.from('lab_downloads').select('*').order('created_at', { ascending: false });
+  const box = pane.querySelector('#list');
+  if (error) { box.innerHTML = `<p class="muted">${esc(error.message)}</p>`; return; }
+  const rows = data || [];
+  const draw = () => {
+    const q = (pane.querySelector('#dsearch').value || '').trim().toLowerCase();
+    const list = rows.filter(r => !q || [r.name, r.email, r.purpose, r.organisation].some(v => (v || '').toLowerCase().includes(q)));
+    box.innerHTML = list.length ? list.map(r => `<div class="user-row">
+      <div class="user-row__main"><b>${esc(r.name)}</b><span class="muted" style="font-size:12px">${esc((r.created_at || '').slice(0, 10))}</span></div>
+      <div class="user-row__grid">
+        <span>✉️ ${esc(r.email)}</span>
+        <span>🏫 ${esc(r.organisation || '—')}</span>
+      </div>
+      <p class="dl-purpose">${esc(r.purpose)}</p>
+    </div>`).join('') : '<p class="muted">No downloads yet.</p>';
+  };
+  draw();
+  pane.querySelector('#dsearch').addEventListener('input', draw);
+  pane.querySelector('.js-export').addEventListener('click', () => {
+    downloadCsv('artharoshni-downloads.csv',
+      ['Name', 'Email', 'Organisation', 'Purpose', 'Date'],
+      rows.map(r => [r.name, r.email, r.organisation, r.purpose, (r.created_at || '').slice(0, 10)]));
+    toast('Exported CSV ✓', 'ok');
+  });
 }
 
 /* --- Announcements --- */

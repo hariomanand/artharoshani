@@ -47,7 +47,8 @@ export function renderLabsHub() {
 }
 
 /* ============================== 500-LAB CATALOGUE ============================== */
-const catState = { q: '', track: 'all', level: 'all' };
+const catState = { q: '', track: 'all', level: 'all', page: 1 };
+const CAT_PER_PAGE = 10;
 
 export function renderCatalogue() {
   const trackChips = ['all', ...TRACK_META.map(t => t.key)].map(k => {
@@ -64,7 +65,7 @@ export function renderCatalogue() {
       <h1>500 Economics Labs</h1>
       <p class="lead">A full, free curriculum of hands-on labs — from first Python steps to advanced econometrics, NLP, behavioral experiments, climate & development economics.</p>
     </div>
-    <a class="btn" href="ArthaRoshni-500-Labs-Catalogue.pdf" target="_blank" rel="noopener" style="margin-bottom:14px">⬇️ Download the full 500-lab PDF catalogue</a>
+    <button type="button" class="btn js-dl-gate" style="margin-bottom:14px">⬇️ Download the full 500-lab PDF catalogue</button>
     <div class="search-box">🔎 <input id="cat-q" type="search" placeholder="Search 500 labs — “regression”, “sentiment”, “Gini”…" value="${esc(catState.q)}" autocomplete="off"></div>
     <div class="fchip-row" data-group="track">${trackChips}</div>
     <div class="fchip-row" data-group="level">${levelChips}</div>
@@ -84,16 +85,50 @@ function renderCatalogueList() {
   const box = document.getElementById('cat-list');
   if (!box) return;
   const rows = filteredCatalogue();
-  const CAP = 60;
-  box.innerHTML = `<div class="cat-count">${rows.length} lab${rows.length === 1 ? '' : 's'}</div>` + (rows.length
-    ? rows.slice(0, CAP).map(l => `<a class="cat-row" href="#/lab-item/${l.id}">
-        <div class="cat-row__id" style="background:${l.color}1a;color:${l.color}">${l.id}</div>
-        <div class="cat-row__body">
-          <h4>${esc(l.title)}</h4>
-          <p><span class="chip">${tIcon(l.trackKey, 12)} ${esc(l.subtopic)}</span> <span class="chip">${esc(l.level)}</span> <span class="chip chip--diff-${l.difficulty.toLowerCase()}">${l.difficulty}</span></p>
-        </div><div class="chapter-row__chev">›</div></a>`).join('')
-      + (rows.length > CAP ? `<p class="muted center mt">Showing ${CAP} of ${rows.length}. Use search or the track / level filters above to narrow down.</p>` : '')
-    : `<div class="empty"><div class="ico">🔍</div><h3>No labs match</h3><p>Try a different keyword or filter.</p></div>`);
+  const pageCount = Math.max(1, Math.ceil(rows.length / CAT_PER_PAGE));
+  if (catState.page > pageCount) catState.page = pageCount;
+  if (catState.page < 1) catState.page = 1;
+  const start = (catState.page - 1) * CAT_PER_PAGE;
+  const pageRows = rows.slice(start, start + CAT_PER_PAGE);
+
+  if (!rows.length) {
+    box.innerHTML = `<div class="empty"><div class="ico">🔍</div><h3>No labs match</h3><p>Try a different keyword or filter.</p></div>`;
+    return;
+  }
+
+  const list = pageRows.map(l => `<a class="cat-row" href="#/lab-item/${l.id}">
+    <div class="cat-row__id" style="background:${l.color}1a;color:${l.color}">${l.id}</div>
+    <div class="cat-row__body">
+      <h4>${esc(l.title)}</h4>
+      <p><span class="chip">${tIcon(l.trackKey, 12)} ${esc(l.subtopic)}</span> <span class="chip">${esc(l.level)}</span> <span class="chip chip--diff-${l.difficulty.toLowerCase()}">${l.difficulty}</span></p>
+    </div><div class="chapter-row__chev">›</div></a>`).join('');
+
+  const from = start + 1, to = start + pageRows.length;
+  box.innerHTML = `<div class="cat-count">Showing ${from}–${to} of ${rows.length} labs · page ${catState.page} of ${pageCount}</div>`
+    + list + pager(pageCount);
+}
+
+// Compact pager: first · prev · a window of numbers · next · last.
+function pager(pageCount) {
+  if (pageCount <= 1) return '';
+  const cur = catState.page;
+  const btn = (label, page, opts = {}) => {
+    if (opts.gap) return `<button class="cat-pager__gap" disabled>…</button>`;
+    const cls = opts.current ? ' is-current' : '';
+    const dis = opts.disabled ? ' disabled' : '';
+    return `<button class="js-cat-page${cls}" data-page="${page}"${dis} aria-label="${opts.aria || 'Page ' + label}"${opts.current ? ' aria-current="page"' : ''}>${label}</button>`;
+  };
+  const nums = [];
+  const win = 2;
+  let lo = Math.max(1, cur - win), hi = Math.min(pageCount, cur + win);
+  if (lo > 1) { nums.push(btn('1', 1)); if (lo > 2) nums.push(btn('', 0, { gap: true })); }
+  for (let p = lo; p <= hi; p++) nums.push(btn(String(p), p, { current: p === cur }));
+  if (hi < pageCount) { if (hi < pageCount - 1) nums.push(btn('', 0, { gap: true })); nums.push(btn(String(pageCount), pageCount)); }
+  return `<div class="cat-pager">
+    ${btn('‹', cur - 1, { disabled: cur === 1, aria: 'Previous page' })}
+    ${nums.join('')}
+    ${btn('›', cur + 1, { disabled: cur === pageCount, aria: 'Next page' })}
+  </div>`;
 }
 
 export function renderCatalogueLab(id) {
@@ -202,23 +237,51 @@ function renderTool(kind, color) {
 }
 
 /* ============================== TOOLS (logic) ============================== */
+// app.js supplies the download handler (it owns the Supabase session + profile).
+let _onDownloadRequest = null;
+export function setDownloadHandler(fn) { _onDownloadRequest = fn; }
+
 export function wireLabs() {
   // Catalogue filters
   const catList = document.getElementById('cat-list');
   if (catList) {
     renderCatalogueList();
+    wirePager(catList);
     const q = document.getElementById('cat-q');
-    if (q) q.addEventListener('input', () => { catState.q = q.value; renderCatalogueList(); });
+    if (q) q.addEventListener('input', () => { catState.q = q.value; catState.page = 1; renderCatalogueList(); wirePager(catList); });
     document.querySelectorAll('.fchip').forEach(b => b.addEventListener('click', () => {
       catState[b.dataset.f] = b.dataset.v;
+      catState.page = 1;
       document.querySelectorAll(`.fchip[data-f="${b.dataset.f}"]`).forEach(x => x.classList.toggle('active', x === b));
       renderCatalogueList();
+      wirePager(catList);
     }));
+    document.querySelector('.js-dl-gate')?.addEventListener('click', () => _onDownloadRequest?.());
   }
 
   const host = document.getElementById('labtool');
   if (!host) return;
   const kind = host.dataset.tool;
+  wireCatalogueTool(host, kind);
+}
+
+// Delegated so it keeps working after renderCatalogueList() replaces the innerHTML.
+function wirePager(catList) {
+  if (catList._pagerWired) return;
+  catList._pagerWired = true;
+  catList.addEventListener('click', e => {
+    const b = e.target.closest('.js-cat-page');
+    if (!b || b.disabled) return;
+    const p = parseInt(b.dataset.page, 10);
+    if (!Number.isNaN(p)) {
+      catState.page = p;
+      renderCatalogueList();
+      document.querySelector('.reader-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+function wireCatalogueTool(host, kind) {
   const color = host.dataset.color;
   const run = host.querySelector('.js-run');
 
