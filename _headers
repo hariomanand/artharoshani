@@ -8,7 +8,13 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 # The admin panel must never be indexed, cached by a shared proxy, framed,
-# or leak its URL via Referer.
+# or leak its URL via Referer. Pages serves admin.html at the clean URL /admin
+# (and 308s /admin.html there), so BOTH paths need the rule.
+/admin
+  Cache-Control: no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
 /admin.html
   Cache-Control: no-store, must-revalidate
   X-Robots-Tag: noindex, nofollow, noarchive, nosnippet

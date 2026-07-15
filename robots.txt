@@ -3,6 +3,7 @@
 
 User-agent: *
 Allow: /
+Disallow: /admin
 Disallow: /admin.html
 
 # AI search & assistant crawlers — explicitly welcome
