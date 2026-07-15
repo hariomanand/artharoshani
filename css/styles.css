@@ -267,6 +267,16 @@ table.data tr:last-child td { border-bottom: none; }
 .scorecard h2 { font-size: 22px; }
 .pyq-badge { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--gold-soft); color: var(--gold); margin-left: 6px; }
 
+/* Signup gate (500-Lab Catalogue) */
+.signup-card { max-width: 540px; margin: 28px auto; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 18px; padding: 30px 28px; box-shadow: var(--shadow-sm); }
+.signup-card__head h2 { font-size: 22px; margin-bottom: 6px; }
+.signup-card__head p { color: var(--ink-soft); font-size: 14.5px; margin-bottom: 20px; line-height: 1.55; }
+.signup-form { display: grid; gap: 14px; }
+.signup-form label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+.signup-form input, .signup-form select { padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 10px; font: inherit; font-size: 14.5px; background: var(--bg); color: var(--ink); }
+.signup-form input:focus, .signup-form select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.signup-note { font-size: 12.5px; color: var(--ink-faint); text-align: center; margin-top: 2px; }
+
 /* QBank mode toggle */
 .qb-modes { display: flex; gap: 4px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 12px; padding: 4px; width: max-content; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
 .qb-mode { padding: 8px 16px; border-radius: 9px; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); transition: background .15s, color .15s; }

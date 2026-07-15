@@ -1,5 +1,5 @@
 // ArthaRoshni service worker — cache-first, offline-ready. No backend needed.
-const CACHE = 'arthapath-v12';
+const CACHE = 'arthapath-v13';
 const ASSETS = [
   './',
   './index.html',

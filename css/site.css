@@ -900,7 +900,7 @@ h1, h2, h3, h4, .font-display, .brand, .topbar__title {
 .home-bp__chips .chip:hover { background: rgba(103,232,249,.14); border-color: #67e8f9; }
 .home-bp__chips .chip--more { color: #67e8f9; }
 .home-bp__map { display: flex; justify-content: center; }
-.home-bp__map svg { width: min(100%, 320px); transition: transform .3s ease; }
+.home-bp__map svg { width: min(100%, 360px); transition: transform .3s ease; border-radius: 16px; border: 1px solid rgba(103, 232, 249, .25); box-shadow: 0 0 40px rgba(103, 232, 249, .15); }
 .home-bp__map:hover svg { transform: scale(1.03); }
 .home-bp__map path {
   fill: rgba(103,232,249,.06); stroke: #67e8f9; stroke-width: 2; stroke-linejoin: round;

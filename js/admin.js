@@ -73,7 +73,7 @@ async function renderShell() {
     return;
   }
 
-  const tabs = [['dash', '📊 Dashboard'], ['content', '📝 Notes'], ['media', '📎 Media/PPT'], ['labs', '🔬 Labs'], ['users', '👥 Users'], ['ann', '📢 Announce']];
+  const tabs = [['dash', '📊 Dashboard'], ['content', '📝 Notes'], ['media', '📎 Media/PPT'], ['labs', '🔬 Labs'], ['users', '👥 Users'], ['signups', '✉️ Signups'], ['ann', '📢 Announce']];
   root.innerHTML = `<div class="adm-shell">
     <div class="adm-top"><div class="logo">₹</div><h1>ArthaRoshni Admin</h1>
       <div class="who">${esc(prof?.full_name || user.email)} <button class="js-out">Sign out</button></div></div>
@@ -95,6 +95,7 @@ async function renderPane() {
   if (tab === 'media') return renderMediaTab(pane);
   if (tab === 'labs') return renderLabsTab(pane);
   if (tab === 'users') return renderUsers(pane);
+  if (tab === 'signups') return renderSignups(pane);
   if (tab === 'ann') return renderAnn(pane);
 }
 
@@ -211,6 +212,18 @@ function renderLabsTab(pane) {
 }
 
 /* --- Users --- */
+async function renderSignups(pane) {
+  pane.innerHTML = `<div class="adm-card"><h2>Catalogue signups</h2><p class="sub">Students who created a free account to unlock the 500-Lab Catalogue.</p><div id="list">Loading…</div></div>`;
+  const { data, error } = await sb.from('signups').select('*').order('created_at', { ascending: false });
+  const box = pane.querySelector('#list');
+  if (error) { box.innerHTML = `<p class="muted">${esc(error.message)}</p>`; return; }
+  box.innerHTML = (data || []).map(r => `<div class="list-row">
+    <div class="main"><b>${esc(r.name)}</b><span>${esc(r.email)}</span></div>
+    <span class="role">${esc(r.klass || '—')}</span>
+    <span class="muted" style="font-size:12px">${esc((r.created_at || '').slice(0, 10))}</span>
+  </div>`).join('') || '<p class="muted">No signups yet.</p>';
+}
+
 async function renderUsers(pane) {
   pane.innerHTML = `<div class="adm-card"><h2>User management</h2><p class="sub">Promote or demote users. New sign-ups appear here automatically.</p><div id="list">Loading…</div></div>`;
   const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });

@@ -36,8 +36,8 @@ const routes = {
   about: viewAbout,
   labs: viewLabs,
   lab: viewLab,
-  catalogue: viewCatalogue,
-  'lab-item': viewCatalogueLab,
+  catalogue: p => Store.profile() ? viewCatalogue(p) : viewSignup('#/catalogue'),
+  'lab-item': p => Store.profile() ? viewCatalogueLab(p) : viewSignup('#/' + ['lab-item'].concat(p).join('/')),
   courses: viewCourses,
   students: viewStudents,
   certifications: viewCertifications,
@@ -236,11 +236,10 @@ function siteFooter() {
     <div class="nl-band"><div class="nl-band__in">
       <div>
         <h3>Get the 500-Lab Catalogue — free.</h3>
-        <p>All 10 tracks — Python, econometrics, NLP, behavioral and more — as one printable PDF. Download it once, keep it forever.</p>
+        <p>All 10 tracks — Python, econometrics, NLP, behavioral and more. Create your free account to explore every lab.</p>
       </div>
       <div class="nl-band__actions">
-        <a class="c-btn c-btn--primary c-btn--lg" href="ArthaRoshni-500-Labs-Catalogue.pdf" target="_blank" rel="noopener">${icon('download', 16)} Download the PDF</a>
-        <a class="c-btn c-btn--outline c-btn--lg" href="#/catalogue">Browse it online</a>
+        <a class="c-btn c-btn--primary c-btn--lg" href="#/catalogue">Explore the Catalogue ${icon('arrow', 15)}</a>
       </div>
     </div></div>
     <div class="site-footer__in">
@@ -249,9 +248,9 @@ function siteFooter() {
         <div class="site-footer__social">${socials}</div>
       </div>
       <div><h5>Courses</h5><a href="#/courses">All courses</a><a href="#/class/class-10">Class 10 Economics</a><a href="#/class/class-11">Class 11 Statistics & Micro</a><a href="#/class/class-12">Class 12 Macro & IED</a><a href="#/blueprint">India's Economic Blueprint</a><a href="#/certifications">Certifications</a></div>
-      <div><h5>Labs</h5><a href="#/labs">Technical Labs</a><a href="#/catalogue">500-Lab Catalogue</a><a href="#/lab/econometrics">Econometrics</a><a href="#/lab/sentiment">Sentiment Analysis</a><a href="ArthaRoshni-500-Labs-Catalogue.pdf" target="_blank" rel="noopener">Catalogue PDF</a></div>
+      <div><h5>Labs</h5><a href="#/labs">Technical Labs</a><a href="#/catalogue">500-Lab Catalogue</a><a href="#/lab/econometrics">Econometrics</a><a href="#/lab/sentiment">Sentiment Analysis</a></div>
       <div><h5>Resources</h5><a href="#/practice">Practice quizzes</a><a href="#/blogs">Blog</a><a href="#/search">Search</a><a href="#/bookmarks">Saved chapters</a><a href="https://ncert.nic.in/textbook.php" target="_blank" rel="noopener">NCERT textbooks</a></div>
-      <div><h5>Company</h5><a href="#/about">About ArthaRoshni</a><a href="#/students">For Students</a><a href="#/blogs">Blog</a><a href="admin.html">Admin</a></div>
+      <div><h5>Company</h5><a href="#/about">About ArthaRoshni</a><a href="#/students">For Students</a><a href="#/blogs">Blog</a></div>
     </div>
     <div class="site-footer__bar"><div class="site-footer__bar-in">
       <span>© 2026 ArthaRoshni · by Roshani — free for education. Built for the students of India 🇮🇳</span>
@@ -428,7 +427,7 @@ G = Government Spending
     <div class="stats-band__grid">
       <div><b>${s.chapters}</b><span>NCERT Chapters</span></div>
       <div><b>500+</b><span>Technical Labs</span></div>
-      <div><b>${s.questions}+</b><span>Practice Questions</span></div>
+      <div><b>${(s.questions + QBANK_TOTAL).toLocaleString('en-IN')}+</b><span>Practice Questions</span></div>
       <div><b>₹0</b><span>Cost, Forever</span></div>
     </div>
   </div></section>
@@ -445,9 +444,9 @@ G = Government Spending
       <a class="c-btn c-btn--primary c-btn--lg" href="#/blueprint">Open the Blueprint ${icon('arrow', 15)}</a>
     </div>
     <a class="home-bp__map" href="#/blueprint" aria-label="Open India's Economic Blueprint">
-      <svg viewBox="30 0 360 440" aria-hidden="true">
-        <path d="M150 18 L186 44 L206 40 L252 68 L300 84 L332 78 L356 86 L344 106 L362 130 L342 152 L318 136 L308 118 L300 150 L295 165 L272 200 L256 240 L236 288 L216 340 L196 394 L188 412 L176 396 L162 332 L150 282 L140 232 L126 202 L98 186 L72 192 L60 176 L82 160 L96 166 L100 150 L76 144 L92 128 L102 118 L116 82 L136 56 Z"/>
-        ${BP_CHAPTERS.map(c => `<circle cx="${c.node.x}" cy="${c.node.y}" r="6" class="nd" style="--node:${c.color}"/>`).join('')}
+      <svg viewBox="0 0 922 960" aria-hidden="true">
+        <image href="assets/india-blueprint.jpg" x="0" y="0" width="922" height="960"/>
+        ${BP_CHAPTERS.map(c => `<circle cx="${c.node.x}" cy="${c.node.y}" r="15" class="nd" style="--node:${c.color}"/>`).join('')}
       </svg>
     </a>
   </div></section>
@@ -869,11 +868,39 @@ function viewRead([classId, chapterId]) {
 
 /* -------------------------------------------------- QUIZ */
 const quizState = {};
+
+// Course chapter → question-bank chapter, so chapter quizzes include the
+// full 100-question bank (options built from authentic answers via mcq.js).
+const QUIZ_QBANK_MAP = {
+  'c10-ch1': ['x', 'q1'], 'c10-ch2': ['x', 'q2'], 'c10-ch3': ['x', 'q3'],
+  'c10-ch4': ['x', 'q4'], 'c10-ch5': ['x', 'q5'],
+  'c11-ied-ch1': ['xi', 'q6'], 'c11-ied-ch2': ['xi', 'q7'], 'c11-ied-ch3': ['xi', 'q8'],
+  'c11-ied-ch4': ['xi', 'q9'], 'c11-ied-ch5': ['xi', 'q11'], 'c11-ied-ch6': ['xi', 'q12'],
+  'c11-ied-ch7': ['xi', 'q13'], 'c11-ied-ch8': ['xi', 'q14'],
+  'c12-mic-ch1': ['xii-micro', 'q22'], 'c12-mac-ch2': ['xii-macro', 'q17'],
+};
+const quizQsCache = {};
+function quizQuestions(ch) {
+  if (quizQsCache[ch.id]) return quizQsCache[ch.id];
+  const base = (ch.questions || []).filter(q => q.type !== 'subjective');
+  const map = QUIZ_QBANK_MAP[ch.id];
+  let extra = [];
+  if (map) {
+    const g = QBANK.groups.find(x => x.id === map[0]);
+    const qc = g && g.chapters.find(x => x.id === map[1]);
+    if (qc) extra = qc.questions.map(({ q, a }) => {
+      const o = buildOptions(map[0], map[1], q, a);
+      return { q, options: o.list, answer: o.answer, explain: a, marks: 1, source: 'qbank' };
+    });
+  }
+  return (quizQsCache[ch.id] = base.concat(extra));
+}
+
 function viewQuiz([classId, chapterId]) {
   const found = findChapter(classId, chapterId);
   if (!found) return notFound();
   const { cls, ch } = found;
-  const qs = (ch.questions || []).filter(q => q.type !== 'subjective');
+  const qs = quizQuestions(ch);
   if (!qs.length) return topbar('Quiz', cls.title, { back: `#/read/${cls.id}/${ch.id}` }) +
     `<main class="page">${empty('🧩', 'No objective questions yet', 'Practice questions for this chapter are coming.')}</main>`;
 
@@ -921,6 +948,29 @@ function viewQuiz([classId, chapterId]) {
   }
 
   return topbar('Chapter Quiz', ch.title, { back: `#/read/${cls.id}/${ch.id}` }) + `<main class="page">${body}</main>`;
+}
+
+/* -------------------------------------------------- SIGNUP gate (catalogue) */
+function viewSignup(returnTo) {
+  return topbar('Create your free account', 'Unlock the 500-Lab Catalogue', { back: '#/' }) + `
+  <main class="page">
+    <div class="signup-card">
+      <div class="signup-card__head">
+        <h2>Explore all 500 labs — free.</h2>
+        <p>One quick signup unlocks the full technical-lab catalogue. No password, no fees, no spam — ArthaRoshni just likes knowing who's learning with us.</p>
+      </div>
+      <form class="signup-form js-signup" data-return="${esc(returnTo)}">
+        <label>Full name<input name="name" type="text" required placeholder="e.g. Roshani Kumari" autocomplete="name"></label>
+        <label>Email<input name="email" type="email" required placeholder="you@example.com" autocomplete="email"></label>
+        <label>Class<select name="klass">
+          <option value="">Select your class (optional)</option>
+          <option>Class 10</option><option>Class 11</option><option>Class 12</option><option>Teacher / Other</option>
+        </select></label>
+        <button class="btn" type="submit">Create free account →</button>
+        <p class="signup-note">Free forever · your details stay with ArthaRoshni only.</p>
+      </form>
+    </div>
+  </main>`;
 }
 
 /* -------------------------------------------------- PRACTICE hub */
@@ -1158,7 +1208,7 @@ function viewAbout() {
     <div class="section-title">📊 What’s inside</div>
     <div class="class-grid">
       <div class="chapter-row"><div class="chapter-row__num">📚</div><div class="chapter-row__body"><h4>${s.chapters} chapters</h4><p><span>${s.ready} with full notes, more being added</span></p></div></div>
-      <div class="chapter-row"><div class="chapter-row__num">❓</div><div class="chapter-row__body"><h4>${s.questions}+ questions</h4><p><span>Chapter-wise practice + PYQ import slot</span></p></div></div>
+      <div class="chapter-row"><div class="chapter-row__num">❓</div><div class="chapter-row__body"><h4>${(s.questions + QBANK_TOTAL).toLocaleString('en-IN')}+ questions</h4><p><span>Chapter-wise practice bank + PYQ import slot</span></p></div></div>
     </div>
 
     <div class="section-title">🎯 About the question bank</div>
@@ -1259,13 +1309,34 @@ function wire() {
     b.classList.toggle('is-active', on);
   }));
 
+  // Catalogue signup gate
+  const signupForm = document.querySelector('.js-signup');
+  if (signupForm) signupForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const fd = new FormData(signupForm);
+    const p = {
+      name: String(fd.get('name') || '').trim(),
+      email: String(fd.get('email') || '').trim(),
+      klass: String(fd.get('klass') || ''),
+    };
+    if (!p.name || !p.email) return;
+    Store.setProfile(p);
+    try {
+      const { getSupabase } = await import('./supabase.js');
+      const sb = await getSupabase();
+      if (sb) await sb.from('signups').insert({ name: p.name, email: p.email, klass: p.klass, source: 'catalogue' });
+    } catch { /* cloud optional — signup still works offline */ }
+    const dest = signupForm.dataset.return || '#/catalogue';
+    if (location.hash === dest) render(); else location.hash = dest;
+  });
+
   // Quiz option click
   document.querySelectorAll('.quiz-opt:not([disabled])').forEach(o => o.addEventListener('click', () => {
     const { name, params } = parseHash();
     if (name !== 'quiz') return;
     const found = findChapter(params[0], params[1]);
     const st = quizState[found.ch.id];
-    const qs = found.ch.questions.filter(q => q.type !== 'subjective');
+    const qs = quizQuestions(found.ch);
     st.picked = +o.dataset.idx;
     st.answered = true;
     if (st.picked === qs[st.i].answer) st.correct++;
@@ -1281,6 +1352,7 @@ function wire() {
 
   document.querySelectorAll('.js-retry').forEach(b => b.addEventListener('click', () => {
     quizState[b.dataset.ch] = { i: 0, correct: 0, answered: false, done: false };
+    delete quizQsCache[b.dataset.ch]; // regenerate MCQ options fresh on retry
     render();
   }));
 

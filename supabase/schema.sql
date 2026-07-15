@@ -133,6 +133,23 @@ create policy media_admin_delete on storage.objects for delete
   using (bucket_id = 'media' and public.is_admin());
 
 -- ================================================================
+-- Catalogue signups (public form — anyone can insert, only admins read)
+-- ================================================================
+create table if not exists public.signups (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  klass text,
+  source text default 'catalogue',
+  created_at timestamptz default now()
+);
+alter table public.signups enable row level security;
+drop policy if exists signups_insert on public.signups;
+create policy signups_insert on public.signups for insert with check (true);
+drop policy if exists signups_admin_read on public.signups;
+create policy signups_admin_read on public.signups for select using (public.is_admin());
+
+-- ================================================================
 -- DONE. Next: create an admin user in Authentication → Users, then run:
 --   update public.profiles set role = 'admin' where email = 'you@example.com';
 -- ================================================================

@@ -11,6 +11,7 @@ let state = load();
 if (!state.read) state.read = {};       // chapterId -> true
 if (!state.bookmarks) state.bookmarks = {}; // chapterId -> true
 if (!state.scores) state.scores = {};    // chapterId -> {best, last, total}
+if (!('profile' in state)) state.profile = null; // {name, email, klass, ts} after signup
 
 export const Store = {
   isRead: id => !!state.read[id],
@@ -28,9 +29,12 @@ export const Store = {
   },
   score: id => state.scores[id],
 
+  profile: () => state.profile,
+  setProfile(p) { state.profile = { ...p, ts: Date.now() }; save(state); },
+
   progress() {
     const readIds = Object.keys(state.read);
     return { readCount: readIds.length, readIds };
   },
-  reset() { state = { read: {}, bookmarks: {}, scores: {} }; save(state); },
+  reset() { state = { read: {}, bookmarks: {}, scores: {}, profile: state.profile }; save(state); },
 };
